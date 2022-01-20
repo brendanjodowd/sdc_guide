@@ -182,20 +182,24 @@ library(sf)</code></pre>
 <h2>Prerequisites</h2>
 <p>I would like for anyone to be able to begin making their own maps, but some familiarity with R is ideal. I think that in order to produce maps independently you should be able to use the following list of functions. The help function in R is very useful, you can find out about a function using <code>?</code>, for example by entering <code>?select</code>.</p>
 <ul>
+<li><code>&lt;-</code> : the assignment operator in R (shortcut Alt -). E.g. <code>x &lt;- 5</code> gives <code>x</code> the value 5.</li>
 <li><code>select()</code> : subsetting columns</li>
 <li><code>filter()</code> : subsetting rows</li>
 <li><code>mutate()</code> : create new variables</li>
 <li><code>group_by()</code> : prepares a dataframe for operations to be carried out on groups of variables. Use <code>ungroup()</code> to remove grouping.</li>
+<li><code>%&gt;%</code> : this is the ‘pipe’ (shortcut Ctrl Shift m), it is a tool for pushing an object through a series of operations. It makes code easier to read and write.</li>
 <li><code>c()</code> : create a vector.</li>
+<li>Logical operators like <code>==</code> (equal to) <code>!=</code> (not equal to) <code>&amp;</code> (and) <code>|</code> (or) <code>%in%</code> (in, I use this a lot to see if a string is in a vector of strings).</li>
 </ul>
 <p>Not an absolute necessity, but I find myself doing a lot of string matching when I’m making maps in R, and for that I use the <code>str_detect()</code> function. A very useful resource is the ‘String manipulation with stringr cheatsheet’, available on the <a href="https://www.rstudio.com/resources/cheatsheets/">RStudio Cheatsheets page</a>.</p>
 </div>
 <div id="importing-maps" class="section level2">
 <h2>Importing maps</h2>
-<p>You <strong>should</strong> be able to import my maps directly from the web, using the following, which will create an object called <code>lea_166</code>. This is an sf object, it is a special type of dataframe that has a column called geometry which contains the coordinates for the shapes. This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total and 167 rows in <code>lea_166</code>.</p>
-<p>I say <strong>should</strong> above because your organisation might not allow R to access the web in this way. If that’s the case then you can navigate to the URL in the <code>st_read()</code> function, and save that page locally as a .geojson file. Then use the file location on your PC as the argument for <code>st_read()</code>.</p>
+<p>You <strong>should</strong> be able to import my maps directly from the web, using the following, which will create an object called <code>lea_166</code>.</p>
 <pre class="r"><code>lea_166 &lt;- st_read(&quot;https://raw.githubusercontent.com/brendanjodowd/maps/main/lea_166.geojson&quot;)</code></pre>
-<p>We will be able to use this map to create other maps, such as county outlines and NUTS 3 region outlines, as we shall see.</p>
+<p>This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total, and a row for each of these, so 167 rows in <code>lea_166</code>. In terms of structure, <code>lea_166</code> is an ‘sf object’, where sf stands for special features (check by running <code>class(lea_166)</code>). This is a special type of dataframe where one of the columns is called <code>geometry</code> and contains the coordinates for the shapes corresponding to that row.</p>
+<p>I say <strong>should</strong> in the above because your organisation might not allow R to access the web in this way. If that’s the case then you can navigate to the URL in the <code>st_read()</code> function, and save that page locally as a .geojson file. Then use the file location on your PC as the argument for <code>st_read()</code>.</p>
+<p>We will be able to use this map of 166 LEAs (plus Northern Ireland) to create other maps, such as county outlines and NUTS 3 region outlines.</p>
 <p>There are 11 columns within <code>lea_166</code>, they are:</p>
 <ul>
 <li>LE_ID : an id sometimes used by CSO</li>
@@ -209,13 +213,31 @@ library(sf)</code></pre>
 <li>Pop2016: The population of the LEA according to Census 2016 data.</li>
 <li>geometry: a list-column containing the geographic coordinates for each LEA.</li>
 </ul>
+<p>You can have a look at <code>lea_166</code> using the <code>glimpse()</code> function:</p>
+<pre class="r"><code>glimpse(lea_166)</code></pre>
+<pre><code>## Rows: 167
+## Columns: 11
+## $ LE_ID      &lt;chr&gt; &quot;13160403&quot;, &quot;13210401&quot;, &quot;13180401&quot;, &quot;1360401&quot;, &quot;13100400&quot;, &quot;13230402~
+## $ LEA        &lt;chr&gt; &quot;Ratoath&quot;, &quot;Roscrea-Templemore&quot;, &quot;Tullamore&quot;, &quot;Tuam&quot;, &quot;Borris-in-Oss~
+## $ COUNTY     &lt;chr&gt; &quot;Meath&quot;, &quot;Tipperary&quot;, &quot;Offaly&quot;, &quot;Galway&quot;, &quot;Laois&quot;, &quot;Westmeath&quot;, &quot;Dub~
+## $ AREA       &lt;dbl&gt; 294.98056, 492.84520, 399.42957, 780.69255, 907.57781, 713.83629, 9.~
+## $ GUID       &lt;chr&gt; &quot;2ae19629-3f1b-13a3-e055-000000000001&quot;, &quot;2ae19629-3f2d-13a3-e055-000~
+## $ NUTS3      &lt;chr&gt; &quot;Mid-East&quot;, &quot;Mid-West&quot;, &quot;Midlands&quot;, &quot;West&quot;, &quot;Midlands&quot;, &quot;Midlands&quot;, ~
+## $ NUTS2      &lt;chr&gt; &quot;Eastern and Midland&quot;, &quot;Southern&quot;, &quot;Eastern and Midland&quot;, &quot;Northern ~
+## $ ADMIN_AREA &lt;chr&gt; &quot;MEATH&quot;, &quot;TIPPERARY&quot;, &quot;OFFALY&quot;, &quot;GALWAY COUNTY&quot;, &quot;LAOIS&quot;, &quot;WESTMEATH~
+## $ cso_name   &lt;chr&gt; &quot;Ratoath, Meath&quot;, &quot;Roscrea-Templemore, Tipperary&quot;, &quot;Tullamore, Offal~
+## $ Pop2016    &lt;dbl&gt; 33318, 16594, 29159, 33191, 24807, 21674, 41593, 13771, 26595, 17255~
+## $ geometry   &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-6.662222 5..., MULTIPOLYGON (((-8.0549~</code></pre>
+</div>
+<div id="first-plot" class="section level2">
+<h2>First plot</h2>
 <p>Let’s take a quick look at the map that we now have using ggplot. ggplot is one of the packages within tidyverse which is very useful for making all kinds of nice plots).</p>
 <pre class="r"><code>ggplot() + geom_sf(data= lea_166)</code></pre>
 <p><img src="index_files/figure-html/first_plot%20-1.png" width="672" /></p>
-<p>This structure of using <code>ggplot()</code> followed by <code>geom_XXX()</code> will be familiar to users of ggplot.</p>
+<p>This structure of using <code>ggplot()</code> followed by <code>+ geom_XXX()</code> will be familiar to users of ggplot (<code>XXX</code> here might be <code>line</code>, <code>bar</code> etc. depending on the type of plot).</p>
 <p>Note that the following piece of code is equivalent, and doesn’t require <code>data =</code>:</p>
 <pre class="r"><code>ggplot(lea_166) + geom_sf()</code></pre>
-<p>I will be using the first format because later I will be using multiple <code>geom_sf()</code> functions to build up a plot in layers, and I find that the dataframe being used is less ambiguous that way.</p>
+<p>Even though this layout is probably more commonly used, I will be using the previous layout because later on I’ll be using multiple <code>geom_sf()</code> functions to build up a plot in layers, and I find that the dataframe being used is less ambiguous that way.</p>
 </div>
 <div id="aggregating-up-for-counties-and-nuts-regions" class="section level2">
 <h2>Aggregating up for counties and NUTS regions</h2>
@@ -231,7 +253,43 @@ library(sf)</code></pre>
 </div>
 <div id="colouring-in-selected-areas-of-the-map" class="section level2">
 <h2>Colouring in selected areas of the map</h2>
-<p>Let’s start with the LEA map and let’s say we want all of the LEAs in the Border</p>
+<p>Let’s start with the LEA map and let’s say we want all of the LEAs in the Border to be coloured in green. We can make a new dataframe called <code>border_leas</code> using filter as follows:</p>
+<pre class="r"><code>border_leas &lt;- lea_166 %&gt;% 
+  filter(NUTS3 == &quot;Border&quot;)</code></pre>
+<p>Now we can plot that as an extra layer on top of our usual LEA map</p>
+<pre class="r"><code>ggplot() + 
+  geom_sf(data = lea_166) +
+  geom_sf(data = border_leas , fill=&quot;green&quot;)</code></pre>
+<p><img src="index_files/figure-html/first_green_plot%20-1.png" width="672" /></p>
+<p>Note that we could have done the filter step within the <code>geom_sf()</code> function if we wanted to, like so:</p>
+<pre class="r"><code>ggplot() + 
+  geom_sf(data = lea_166) +
+  geom_sf(data = lea_166 %&gt;% filter(NUTS3 == &quot;Border&quot;) , fill=&quot;green&quot;)</code></pre>
+<p>The filter function is very powerful, and we can include multiple clauses separated by commas. Let’s say we want all LEAs in the Border and South-West NUTS 3 regions or in County Offaly, and excluding the LEA of Kenmare and any LEA that includes the string ‘Cork City’.</p>
+<pre class="r"><code>selected_areas &lt;- lea_166 %&gt;% 
+  filter(NUTS3 %in% c(&quot;Border&quot; ,&quot;South-West&quot;) | COUNTY ==&quot;Offaly&quot; , 
+         LEA != &quot;Kenmare&quot;, 
+         ! str_detect(LEA , &quot;Cork City&quot;)) </code></pre>
+<p>I could have used <code>&amp;</code> instead of the commas in the argument of <code>filter</code> above, but I would probably need to use brackets as well around the first logical OR operation. Anyway, let’s plot <code>selected_areas</code>.</p>
+<pre class="r"><code>ggplot() + 
+  geom_sf(data = lea_166) +
+  geom_sf(data = selected_areas , fill=&quot;green&quot;)</code></pre>
+<p><img src="index_files/figure-html/second_green_plot%20-1.png" width="672" /></p>
+</div>
+<div id="adding-more-layers-and-theme_void" class="section level2">
+<h2>Adding more layers and <code>theme_void()</code></h2>
+<p>Let’s take the previous map and add dark outlines for the NUTS 3 regions. I’m going to set <code>fill</code> to <code>NA</code> which means it won’t have any fill colour, then set the line colour to black using <code>colour="black"</code>, and I’ll set the line width to 2 using <code>size=2</code>.</p>
+<p>I’m also going to add <code>theme_void()</code> here. With ggplot there are lots of different themes you can add to change the appearance of your plot, but for maps the only one I really use is <code>theme_void()</code>. It’s effect is to remove the axes and give you a clear background.</p>
+<pre class="r"><code>nuts_outline &lt;- lea_166 %&gt;% 
+  group_by(NUTS3) %&gt;% 
+  summarise(geometry = st_union(geometry))
+
+ggplot() + 
+  geom_sf(data = lea_166) +
+  geom_sf(data = selected_areas , fill=&quot;green&quot;) +
+  geom_sf(data = nuts_outline , fill= NA , colour=&quot;black&quot;, size=2) +
+  theme_void()</code></pre>
+<p><img src="index_files/figure-html/nuts_outline%20-1.png" width="672" /></p>
 </div>
 
 
