@@ -14,10 +14,11 @@ This guide uses maps from my GitHub page produced using shapefiles from [OSi](ht
 
 Two packages are used throughout, they are [tidyverse](https://tidyverse.tidyverse.org/) (actually a collection of packages) and [sf](https://r-spatial.github.io/sf/), which stands for simple features. To install any package run ```install.packages("package_name")```.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+To start, we will need to load both of these packages
 
-```{r cars}
-summary(cars)
+```{r packages}
+library(tidyverse)
+library(sf)
 ```
 
 ## Including Plots
