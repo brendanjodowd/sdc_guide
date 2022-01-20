@@ -172,7 +172,7 @@ pre code {
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>This guide uses maps from my GitHub page produced using shapefiles from <a href="https://data-osi.opendata.arcgis.com/">OSi</a> and <a href="https://www.spatialni.gov.uk/">OSNI</a>.</p>
+<p>This guide uses <a href="https://github.com/brendanjodowd/maps">maps from my GitHub page</a> produced using shapefiles from <a href="https://data-osi.opendata.arcgis.com/">OSi</a> and <a href="https://www.spatialni.gov.uk/">OSNI</a>.</p>
 <p>Two packages are used throughout, they are <a href="https://tidyverse.tidyverse.org/">tidyverse</a> (actually a collection of packages) and <a href="https://r-spatial.github.io/sf/">sf</a>, which stands for simple features. To install any package run <code>install.packages("package_name")</code>.</p>
 <p>To start, we will need to load both of these packages.</p>
 <pre class="r"><code>library(tidyverse)
@@ -292,6 +292,28 @@ ggplot() +
   geom_sf(data = nuts_outline , fill= NA , colour=&quot;black&quot;, size=1) +
   theme_void()</code></pre>
 <p><img src="index_files/figure-html/nuts_outline%20-1.png" width="672" /></p>
+</div>
+<div id="assigning-plots-to-an-object-with-a-name" class="section level2">
+<h2>Assigning plots to an object with a name</h2>
+<p>Rather than simply plotting a ggplot object immediately, you can turn it into an object in the R environment with its own name. For example, let’s take the first three lines of the previous <code>ggplot</code> statement and make an object called <code>base_plot</code>:</p>
+<pre class="r"><code>base_plot &lt;- ggplot() + 
+  geom_sf(data = lea_166) +
+  geom_sf(data = selected_areas , fill=&quot;green&quot;) </code></pre>
+<p>Now we can add to this as we please (resulting plot not shown, same as previous image). You might like to try this approach if you are making several plots which have a certain amount of detail in common.</p>
+<pre class="r"><code>base_plot + 
+  geom_sf(data = lea_166 %&gt;% filter(COUNTY==&quot;Dublin&quot;) , fill=&quot;blue&quot;) +
+  geom_sf(data = nuts_outline , fill= NA , colour=&quot;black&quot;, size=1) +
+  theme_void()  </code></pre>
+<p><img src="index_files/figure-html/base_plot_2%20-1.png" width="672" /></p>
+</div>
+<div id="saving-plots" class="section level2">
+<h2>Saving plots</h2>
+<p>The function used to save plots is <code>ggsave</code>. By default it saves the last plot displayed. Here is how it is used:</p>
+<pre class="r"><code>ggsave(file = &quot;images/map_with_selected_areas.png&quot; , width=18, height = 24, units=&quot;cm&quot;) </code></pre>
+<p>You can save a named plot to file by creating a named object from a <code>ggplot</code> statement and passing that to <code>ggsave</code> using <code>plot =</code></p>
+<pre class="r"><code>simple_lea_map &lt;- ggplot() + geom_sf(data = lea_166)
+
+ggsave(file = &quot;images/simple_lea_map.png&quot; , plot = simple_lea_map, width=18, height = 24, units=&quot;cm&quot;) </code></pre>
 </div>
 
 

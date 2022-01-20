@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-This guide uses maps from my GitHub page produced using shapefiles from [OSi](https://data-osi.opendata.arcgis.com/) and [OSNI](https://www.spatialni.gov.uk/).
+This guide uses [maps from my GitHub page](https://github.com/brendanjodowd/maps) produced using shapefiles from [OSi](https://data-osi.opendata.arcgis.com/) and [OSNI](https://www.spatialni.gov.uk/).
  
 Two packages are used throughout, they are [tidyverse](https://tidyverse.tidyverse.org/) (actually a collection of packages) and [sf](https://r-spatial.github.io/sf/), which stands for simple features. To install any package run ```install.packages("package_name")```.
 
@@ -174,4 +174,39 @@ ggplot() +
   geom_sf(data = lea_166 %>% filter(COUNTY=="Dublin") , fill="blue") +
   geom_sf(data = nuts_outline , fill= NA , colour="black", size=1) +
   theme_void()
+```
+
+## Assigning plots to an object with a name
+
+Rather than simply plotting a ggplot object immediately, you can turn it into an object in the R environment with its own name. For example, let's take the first three lines of the previous ```ggplot``` statement and make an object called ```base_plot```:
+
+```{r base_plot , message=FALSE , results="hide"}
+base_plot <- ggplot() + 
+  geom_sf(data = lea_166) +
+  geom_sf(data = selected_areas , fill="green") 
+```
+
+Now we can add to this as we please (resulting plot not shown, same as previous image). You might like to try this approach if you are making several plots which have a certain amount of detail in common. 
+
+```{r base_plot_2 , message=FALSE , results="hide"}
+base_plot + 
+  geom_sf(data = lea_166 %>% filter(COUNTY=="Dublin") , fill="blue") +
+  geom_sf(data = nuts_outline , fill= NA , colour="black", size=1) +
+  theme_void()  
+```
+
+## Saving plots
+
+The function used to save plots is ```ggsave```. By default it saves the last plot displayed. Here is how it is used:
+
+```{r ggsave , message=FALSE , results="hide"}
+ggsave(file = "images/map_with_selected_areas.png" , width=18, height = 24, units="cm") 
+```
+
+You can save a named plot to file by creating a named object from a ```ggplot``` statement and passing that to ```ggsave``` using ```plot = ```
+
+```{r ggsave_2 , eval=FALSE}
+simple_lea_map <- ggplot() + geom_sf(data = lea_166)
+
+ggsave(file = "images/simple_lea_map.png" , plot = simple_lea_map, width=18, height = 24, units="cm") 
 ```
