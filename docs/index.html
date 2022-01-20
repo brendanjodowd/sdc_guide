@@ -175,21 +175,22 @@ pre code {
 <p>This guide uses maps from my GitHub page produced using shapefiles from <a href="https://data-osi.opendata.arcgis.com/">OSi</a> and <a href="https://www.spatialni.gov.uk/">OSNI</a>.</p>
 <p>Two packages are used throughout, they are <a href="https://tidyverse.tidyverse.org/">tidyverse</a> (actually a collection of packages) and <a href="https://r-spatial.github.io/sf/">sf</a>, which stands for simple features. To install any package run <code>install.packages("package_name")</code>.</p>
 <p>To start, we will need to load both of these packages</p>
-<pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## -- Attaching packages ------------------------------------------------ tidyverse 1.3.1 --</code></pre>
-<pre><code>## v ggplot2 3.3.5     v purrr   0.3.4
-## v tibble  3.1.4     v dplyr   1.0.7
-## v tidyr   1.1.3     v stringr 1.4.0
-## v readr   2.0.1     v forcats 0.5.1</code></pre>
-<pre><code>## -- Conflicts --------------------------------------------------- tidyverse_conflicts() --
-## x dplyr::filter() masks stats::filter()
-## x dplyr::lag()    masks stats::lag()</code></pre>
-<pre class="r"><code>library(sf)</code></pre>
-<pre><code>## Linking to GEOS 3.9.0, GDAL 3.2.1, PROJ 7.2.1</code></pre>
+<pre class="r"><code>library(tidyverse)
+library(sf)</code></pre>
 </div>
-<div id="including-plots" class="section level2">
-<h2>Including Plots</h2>
+<div id="importing-maps" class="section level2">
+<h2>Importing maps</h2>
+<p>You <strong>should</strong> be able to import my maps directly from the web, using the following, which will create an object called <code>lea_166</code>. This is an sf object, it is a special type of dataframe that has a column called geometry which contains the coordinates for the shapes. This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total and 167 rows in <code>lea_166</code></p>
 <p>You can also embed plots, for example:</p>
+<pre class="r"><code>lea_166 &lt;- st_read(&quot;https://raw.githubusercontent.com/brendanjodowd/maps/main/lea_166.geojson&quot;)</code></pre>
+<pre><code>## Reading layer `lea_166&#39; from data source 
+##   `https://raw.githubusercontent.com/brendanjodowd/maps/main/lea_166.geojson&#39; 
+##   using driver `GeoJSON&#39;
+## Simple feature collection with 167 features and 10 fields
+## Geometry type: MULTIPOLYGON
+## Dimension:     XY
+## Bounding box:  xmin: -10.66284 ymin: 51.41991 xmax: -5.432917 ymax: 55.44644
+## Geodetic CRS:  WGS 84</code></pre>
 <p><img src="index_files/figure-html/pressure-1.png" width="672" /></p>
 <p>Note that the <code>echo = FALSE</code> parameter was added to the code chunk to prevent printing of the R code that generated the plot.</p>
 </div>

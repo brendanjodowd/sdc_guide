@@ -11,19 +11,25 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Introduction
 
 This guide uses maps from my GitHub page produced using shapefiles from [OSi](https://data-osi.opendata.arcgis.com/) and [OSNI](https://www.spatialni.gov.uk/).
-
+ 
 Two packages are used throughout, they are [tidyverse](https://tidyverse.tidyverse.org/) (actually a collection of packages) and [sf](https://r-spatial.github.io/sf/), which stands for simple features. To install any package run ```install.packages("package_name")```.
 
 To start, we will need to load both of these packages
 
-```{r packages}
+```{r packages , message=FALSE}
 library(tidyverse)
 library(sf)
 ```
 
-## Including Plots
+## Importing maps
+
+You **should** be able to import my maps directly from the web, using the following, which will create an object called ```lea_166```. This is an sf object, it is a special type of dataframe that has a column called geometry which contains the coordinates for the shapes. This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total and 167 rows in ```lea_166```
 
 You can also embed plots, for example:
+
+```{r import_map , message=FALSE}
+lea_166 <- st_read("https://raw.githubusercontent.com/brendanjodowd/maps/main/lea_166.geojson")
+```
 
 ```{r pressure, echo=FALSE}
 plot(pressure)
