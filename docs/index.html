@@ -174,23 +174,31 @@ pre code {
 <h2>Introduction</h2>
 <p>This guide uses maps from my GitHub page produced using shapefiles from <a href="https://data-osi.opendata.arcgis.com/">OSi</a> and <a href="https://www.spatialni.gov.uk/">OSNI</a>.</p>
 <p>Two packages are used throughout, they are <a href="https://tidyverse.tidyverse.org/">tidyverse</a> (actually a collection of packages) and <a href="https://r-spatial.github.io/sf/">sf</a>, which stands for simple features. To install any package run <code>install.packages("package_name")</code>.</p>
-<p>To start, we will need to load both of these packages</p>
+<p>To start, we will need to load both of these packages.</p>
 <pre class="r"><code>library(tidyverse)
 library(sf)</code></pre>
 </div>
 <div id="importing-maps" class="section level2">
 <h2>Importing maps</h2>
-<p>You <strong>should</strong> be able to import my maps directly from the web, using the following, which will create an object called <code>lea_166</code>. This is an sf object, it is a special type of dataframe that has a column called geometry which contains the coordinates for the shapes. This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total and 167 rows in <code>lea_166</code></p>
-<p>You can also embed plots, for example:</p>
+<p>You <strong>should</strong> be able to import my maps directly from the web, using the following, which will create an object called <code>lea_166</code>. This is an sf object, it is a special type of dataframe that has a column called geometry which contains the coordinates for the shapes. This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total and 167 rows in <code>lea_166</code>.</p>
+<p>I say <strong>should</strong> above because your organisation might not allow R to access the web in this way. If that’s the case then you can navigate to the URL in the <code>st_read()</code> function, and save that page locally as a .geojson file. Then use the file location on your PC as the argument for <code>st_read()</code>.</p>
 <pre class="r"><code>lea_166 &lt;- st_read(&quot;https://raw.githubusercontent.com/brendanjodowd/maps/main/lea_166.geojson&quot;)</code></pre>
-<pre><code>## Reading layer `lea_166&#39; from data source 
-##   `https://raw.githubusercontent.com/brendanjodowd/maps/main/lea_166.geojson&#39; 
-##   using driver `GeoJSON&#39;
-## Simple feature collection with 167 features and 10 fields
-## Geometry type: MULTIPOLYGON
-## Dimension:     XY
-## Bounding box:  xmin: -10.66284 ymin: 51.41991 xmax: -5.432917 ymax: 55.44644
-## Geodetic CRS:  WGS 84</code></pre>
+<p>We will be able to use this map to create other maps, such as county outlines and NUTS 3 region outlines, as we shall see.</p>
+<p>Let’s take a quick look at the map that we now have using ggplot (ggplot is one of the packages within tidyverse which is very useful for making all kinds of nice plots).</p>
+<pre class="r"><code>ggplot() + geom_sf(data= lea_166)</code></pre>
+<p><img src="index_files/figure-html/first_plot%20-1.png" width="672" /></p>
+<p>This structure of using <code>ggplot()</code> followed by <code>geom_XXX()</code> will be familiar to users of ggplot.</p>
+<p>Note that the following piece of code is equivalent, and doesn’t require <code>data =</code>:</p>
+<pre class="r"><code>ggplot(lea_166) + geom_sf()</code></pre>
+<p>I will be using the first format because later I will be using multiple <code>geom_sf()</code> functions to build up a plot in layers, and I find that the dataframe being used is less ambiguous that way.</p>
+</div>
+<div id="aggregating-up-for-counties-and-nuts-regions" class="section level2">
+<h2>Aggregating up for counties and NUTS regions</h2>
+<p>Maps for counties, admin areas, NUTS2 and NUTS3 regions can be produced using either of the shapefiles provided. To produce a map of counties, for example, use:</p>
+<pre class="r"><code>county_map &lt;- lea_166 %&gt;% 
+  group_by(COUNTY) %&gt;% 
+  summarise(geometry = st_union(geometry) , AREA=sum(AREA))</code></pre>
+<p>You can also embed plots, for example:</p>
 <p><img src="index_files/figure-html/pressure-1.png" width="672" /></p>
 <p>Note that the <code>echo = FALSE</code> parameter was added to the code chunk to prevent printing of the R code that generated the plot.</p>
 </div>
