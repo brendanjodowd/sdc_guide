@@ -1,7 +1,6 @@
 ---
-title: "homepage"
+title: "Making maps of Ireland in R"
 author: "Brendan O'Dowd"
-date: "1/20/2022"
 output: html_document
 ---
 
@@ -9,9 +8,11 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Introduction
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This guide uses maps from my GitHub page produced using shapefiles from [OSi](https://data-osi.opendata.arcgis.com/) and [OSNI](https://www.spatialni.gov.uk/).
+
+Two packages are used throughout, they are [tidyverse](https://tidyverse.tidyverse.org/) (actually a collection of packages) and [sf](https://r-spatial.github.io/sf/), which stands for simple features. To install any package run ```install.packages("package_name")```.
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
