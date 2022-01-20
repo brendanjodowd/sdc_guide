@@ -138,7 +138,7 @@ ggplot() +
   geom_sf(data = lea_166 %>% filter(NUTS3 == "Border") , fill="green")
 ```
 
-The filter function is very powerful, and we can include multiple clauses separated by commas. Let's say we want all LEAs in the Border and South-West NUTS 3 regions or in County Offaly, and excluding the LEA of Kenmare and any LEA that includes the string 'Cork City'.  
+The filter function is very powerful, and we can include multiple clauses separated by commas. Let's say we want all LEAs in the Border and South-West NUTS 3 regions or in County Offaly, and excluding the LEA of Kenmare and any LEA that includes the string 'Cork City'. I know this seems like a silly collection but hopefully it will give you a guide to making your own complex subsets.
 
 ```{r selected_areas_1 , message=FALSE , results="hide"}
 selected_areas <- lea_166 %>% 
@@ -147,7 +147,7 @@ selected_areas <- lea_166 %>%
          ! str_detect(LEA , "Cork City")) 
 ```
 
-I could have used ```&``` instead of the commas in the argument of ```filter``` above, but I would probably need to use brackets as well around the first logical OR operation. Anyway, let's plot ```selected_areas```. 
+Note the use of ```!``` above in front of the ```str_detect``` function, which negates or produces the opposite of the logical expression in front of it. You could have used ```&``` instead of the commas in the argument of ```filter``` above, but using logical AND as well as logical OR can be unambiguous, so you should use extra brackets if doing so. Anyway, let's plot ```selected_areas```. 
 
 ```{r second_green_plot , message=FALSE , results="hide"}
 ggplot() + 
@@ -155,9 +155,11 @@ ggplot() +
   geom_sf(data = selected_areas , fill="green")
 ```
 
-## Adding more layers and ```theme_void()```
+## Adding more layers and using ```theme_void()```
 
-Let's take the previous map and add dark outlines for the NUTS 3 regions. I'm going to set ```fill``` to ```NA``` which means it won't have any fill colour, then set the line colour to black using ```colour="black"```, and I'll set the line width to 2 using ```size=2```. 
+Let's take the previous map and add dark outlines for the NUTS 3 regions. I'm going to set ```fill``` to ```NA``` which means it won't have any fill colour, then set the line colour to black using ```colour="black"```, and I'll set the line width to 1 using ```size=1```. 
+
+Let's add another coloured layer, we'll make all of Dublin blue. The line of code for this will need to go before the NUTS 3 outline, otherwise it will partially obscure that outline. 
 
 I'm also going to add ```theme_void()``` here. With ggplot there are lots of different themes you can add to change the appearance of your plot, but for maps the only one I really use is ```theme_void()```. It's effect is to remove the axes and give you a clear background.
 
@@ -169,6 +171,7 @@ nuts_outline <- lea_166 %>%
 ggplot() + 
   geom_sf(data = lea_166) +
   geom_sf(data = selected_areas , fill="green") +
-  geom_sf(data = nuts_outline , fill= NA , colour="black", size=2) +
+  geom_sf(data = lea_166 %>% filter(COUNTY=="Dublin") , fill="blue") +
+  geom_sf(data = nuts_outline , fill= NA , colour="black", size=1) +
   theme_void()
 ```

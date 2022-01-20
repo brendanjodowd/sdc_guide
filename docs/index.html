@@ -265,20 +265,21 @@ library(sf)</code></pre>
 <pre class="r"><code>ggplot() + 
   geom_sf(data = lea_166) +
   geom_sf(data = lea_166 %&gt;% filter(NUTS3 == &quot;Border&quot;) , fill=&quot;green&quot;)</code></pre>
-<p>The filter function is very powerful, and we can include multiple clauses separated by commas. Let’s say we want all LEAs in the Border and South-West NUTS 3 regions or in County Offaly, and excluding the LEA of Kenmare and any LEA that includes the string ‘Cork City’.</p>
+<p>The filter function is very powerful, and we can include multiple clauses separated by commas. Let’s say we want all LEAs in the Border and South-West NUTS 3 regions or in County Offaly, and excluding the LEA of Kenmare and any LEA that includes the string ‘Cork City’. I know this seems like a silly collection but hopefully it will give you a guide to making your own complex subsets.</p>
 <pre class="r"><code>selected_areas &lt;- lea_166 %&gt;% 
   filter(NUTS3 %in% c(&quot;Border&quot; ,&quot;South-West&quot;) | COUNTY ==&quot;Offaly&quot; , 
          LEA != &quot;Kenmare&quot;, 
          ! str_detect(LEA , &quot;Cork City&quot;)) </code></pre>
-<p>I could have used <code>&amp;</code> instead of the commas in the argument of <code>filter</code> above, but I would probably need to use brackets as well around the first logical OR operation. Anyway, let’s plot <code>selected_areas</code>.</p>
+<p>Note the use of <code>!</code> above in front of the <code>str_detect</code> function, which negates or produces the opposite of the logical expression in front of it. You could have used <code>&amp;</code> instead of the commas in the argument of <code>filter</code> above, but using logical AND as well as logical OR can be unambiguous, so you should use extra brackets if doing so. Anyway, let’s plot <code>selected_areas</code>.</p>
 <pre class="r"><code>ggplot() + 
   geom_sf(data = lea_166) +
   geom_sf(data = selected_areas , fill=&quot;green&quot;)</code></pre>
 <p><img src="index_files/figure-html/second_green_plot%20-1.png" width="672" /></p>
 </div>
-<div id="adding-more-layers-and-theme_void" class="section level2">
-<h2>Adding more layers and <code>theme_void()</code></h2>
-<p>Let’s take the previous map and add dark outlines for the NUTS 3 regions. I’m going to set <code>fill</code> to <code>NA</code> which means it won’t have any fill colour, then set the line colour to black using <code>colour="black"</code>, and I’ll set the line width to 2 using <code>size=2</code>.</p>
+<div id="adding-more-layers-and-using-theme_void" class="section level2">
+<h2>Adding more layers and using <code>theme_void()</code></h2>
+<p>Let’s take the previous map and add dark outlines for the NUTS 3 regions. I’m going to set <code>fill</code> to <code>NA</code> which means it won’t have any fill colour, then set the line colour to black using <code>colour="black"</code>, and I’ll set the line width to 1 using <code>size=1</code>.</p>
+<p>Let’s add another coloured layer, we’ll make all of Dublin blue. The line of code for this will need to go before the NUTS 3 outline, otherwise it will partially obscure that outline.</p>
 <p>I’m also going to add <code>theme_void()</code> here. With ggplot there are lots of different themes you can add to change the appearance of your plot, but for maps the only one I really use is <code>theme_void()</code>. It’s effect is to remove the axes and give you a clear background.</p>
 <pre class="r"><code>nuts_outline &lt;- lea_166 %&gt;% 
   group_by(NUTS3) %&gt;% 
@@ -287,7 +288,8 @@ library(sf)</code></pre>
 ggplot() + 
   geom_sf(data = lea_166) +
   geom_sf(data = selected_areas , fill=&quot;green&quot;) +
-  geom_sf(data = nuts_outline , fill= NA , colour=&quot;black&quot;, size=2) +
+  geom_sf(data = lea_166 %&gt;% filter(COUNTY==&quot;Dublin&quot;) , fill=&quot;blue&quot;) +
+  geom_sf(data = nuts_outline , fill= NA , colour=&quot;black&quot;, size=1) +
   theme_void()</code></pre>
 <p><img src="index_files/figure-html/nuts_outline%20-1.png" width="672" /></p>
 </div>
