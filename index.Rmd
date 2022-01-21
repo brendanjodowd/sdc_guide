@@ -12,9 +12,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This guide uses [maps from my GitHub page](https://github.com/brendanjodowd/maps) produced using shapefiles from [OSi](https://data-osi.opendata.arcgis.com/) and [OSNI](https://www.spatialni.gov.uk/).
  
-Two packages are used throughout, they are [tidyverse](https://tidyverse.tidyverse.org/) (actually a collection of packages) and [sf](https://r-spatial.github.io/sf/), which stands for simple features. To install any package run ```install.packages("package_name")```.
+Two packages are used throughout, they are [tidyverse](https://tidyverse.tidyverse.org/) and [sf](https://r-spatial.github.io/sf/). Tidyverse is actually a collection of packages that all work together. One of these is called ggplot2, and this is very useful for making nice plots. sf stands for simple features, it is a package for working with spatial data, and it is designed to be compatible with tidyverse. The spatial data objects that you manipulate with the sf package are called 'sf objects'. More on that later. 
 
-To start, we will need to load both of these packages.
+To install the collection of tidyverse packages (including ggplot2) run ```install.packages("tidyverse")```, and to install the sf package run ```install.packages("sf")```.
+
+There are alternative packages and approaches in R for producing maps. Other options include the plotting functions in base R and the tmap package. I find that using ggplot2 together with sf offers the best balance of flexibility and ease of use. Alongside the sf package and sf objects there is an older package called sp with associated sp objects, and I would advise against using sp under any circumstances. It has poor compatibility, fewer features and is much more difficult to use.  
+
+To start, we will need to load both the tidyverse packages and the sf package.
 
 ```{r packages , message=FALSE}
 library(tidyverse)
@@ -23,7 +27,7 @@ library(sf)
 
 ## Prerequisites
 
-I would like for anyone to be able to begin making their own maps, but some familiarity with R is ideal. I think that in order to produce maps independently you should be able to use the following list of functions. The help function in R is very useful, you can find out about a function using ```?```, for example by entering ```?select```. 
+I would like for anyone to be able to begin making their own maps, but some familiarity with R is ideal. I think that in order to produce maps beyond the examples in this guide you should be able to use the following list of functions. The help function in R is very useful, you can find out about a function using ```?```, for example by entering ```?select```. 
 
 
 - ```<-``` : the assignment operator in R (shortcut Alt -). E.g. ```x <- 5``` gives ```x``` the value 5. 
@@ -46,9 +50,9 @@ lea_166 <- st_read("https://raw.githubusercontent.com/brendanjodowd/maps/main/le
 
 ```
 
-This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total, and a row for each of these, so 167 rows in ```lea_166```. In terms of structure, ```lea_166``` is an 'sf object', where sf stands for special features (check by running ```class(lea_166)```). This is a special type of dataframe where one of the columns is called ```geometry``` and contains the coordinates for the shapes corresponding to that row.  
+This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total, and a row for each of these, so 167 rows in ```lea_166```. In terms of structure, ```lea_166``` is an 'sf object', where sf stands for simple features (check by running ```class(lea_166)```). This is a special type of dataframe where one of the columns is called ```geometry``` and contains the coordinates for the shapes corresponding to that row.  
 
-I say **should** in the above because your organisation might not allow R to access the web in this way. If that's the case then you can navigate to the URL in the ```st_read()``` function, and save that page locally as a .geojson file. Then use the file location on your PC as the argument for ```st_read()```.
+I say **should** in the above because your organisation might not allow R to access the web in this way. If that's the case then you can navigate to the URL in the ```st_read()``` function, and save that page locally as a .geojson file. Then use the file location on your PC as the argument for ```st_read()``` instead of the URL.
 
 
 We will be able to use this map of 166 LEAs (plus Northern Ireland) to create other maps, such as county outlines and NUTS 3 region outlines.
@@ -74,7 +78,7 @@ glimpse(lea_166)
 
 ## First plot
 
-Let's take a quick look at the map that we now have using ggplot. ggplot is one of the packages within tidyverse which is very useful for making all kinds of nice plots).
+Let's take a quick look at the map that we now have using ggplot. 
 
 ```{r first_plot , message=FALSE , results="hide"}
 ggplot(lea_166) + geom_sf()
@@ -127,7 +131,7 @@ Try making a similar plot of the NUTS3 regions.
 
 ##  Colouring in selected areas of the map
 
-Let's start with the LEA map and let's say we want all of the LEAs in the Border to be coloured in green. We can make a new dataframe called ```border_leas``` using filter as follows:
+Let's start with the LEA map and let's say we want all of the LEAs in the Border to be coloured in green. We can make a new dataframe called ```border_leas``` using ```filter``` as follows:
 
 ```{r border_filter , message=FALSE , results="hide"}
 border_leas <- lea_166 %>% 
@@ -150,7 +154,7 @@ ggplot(lea_166) +
   geom_sf(data = lea_166 %>% filter(NUTS3 == "Border") , fill="green")
 ```
 
-The filter function is very powerful, and we can include multiple clauses separated by commas. Let's say we want all LEAs in the Border and South-West NUTS 3 regions or in County Offaly, and excluding the LEA of Kenmare and any LEA that includes the string 'Cork City'. I know this seems like a silly collection but hopefully it will give you a guide to making your own complex subsets.
+The filter function is very powerful, and we can include multiple clauses separated by commas. Let's say we want all LEAs in the Border and South-West NUTS 3 regions, and all the LEAs in County Offaly, but we want to exclude the LEA of Kenmare and any LEA which has the string 'Cork City' in its name. I know this seems like a silly selection but hopefully it will give you a guide to making your own complex subsets.
 
 ```{r selected_areas_1 , message=FALSE , results="hide"}
 selected_areas <- lea_166 %>% 
@@ -159,7 +163,7 @@ selected_areas <- lea_166 %>%
          ! str_detect(LEA , "Cork City")) 
 ```
 
-Note the use of ```!``` above in front of the ```str_detect``` function, which negates or produces the opposite of the logical expression in front of it. You could have used ```&``` instead of the commas in the argument of ```filter``` above, but using logical AND as well as logical OR can be ambiguous, so you should use extra brackets if doing so. Anyway, let's plot ```selected_areas```. 
+Note the use of ```!``` above in front of the ```str_detect``` function, which negates or produces the opposite of the logical expression in front of it. You could have used ```&``` instead of the commas in the argument of ```filter``` above, but using logical AND as well as logical OR can be ambiguous (brackets ought to be used). Anyway, let's plot ```selected_areas```. 
 
 ```{r second_green_plot , message=FALSE , results="hide"}
 ggplot(lea_166) + 
@@ -220,7 +224,7 @@ ggsave(file = "images/map_with_selected_areas.png" , width=18, height = 24, unit
 You can save a named plot to file using the using ```plot = ``` argument within ```ggsave```. Let's create ```simple_lea_map``` and save that. 
 
 ```{r ggsave_2 , eval=FALSE}
-simple_lea_map <- ggplot() + geom_sf(data = lea_166)
+simple_lea_map <- ggplot(lea_166) + geom_sf()
 
 ggsave(file = "images/simple_lea_map.png" , plot = simple_lea_map, width=18, height = 24, units="cm") 
 ```
@@ -335,6 +339,10 @@ ggplot(lea_166) +
 
 ## Categorical colouration
 
+Suppose we want to plot a categorical variable, perhaps one based on bands of a continuous variable. 
+
+Probably two ways of doing this, one with a new variable that is factorised, and maybe also using some kind of format over the existing variable. 
+
 ## Insets
 
 Let's say that we want a map with an inset for Dublin City. The easiest way I have found for doing this is using the [cowplot package](https://www.rdocumentation.org/packages/cowplot/versions/1.1.1), which helps you to make compound images. We will create our map for the whole country and then add a layer on top of this for our inset using the ```draw_plot``` function from cowplot. 
@@ -361,7 +369,7 @@ main_map <- ggplot(lea_166) +
 main_map
 ```
 
-Now let's make the inset map. It is ```main_map``` plus ```coord_sf``` to crop to the same coordinates as the black rectangle. Note the use of ```expand = FALSE``` to remove the padding; otherwise the black rectangle would sit a little bit inside the inset plot. I've also added an extra ```theme``` function to get rid of the legend sinmce we don't need an extra legend in the inset. 
+Now let's make the inset map. It is ```main_map``` plus ```coord_sf``` to crop to the same coordinates as the black rectangle. Note the use of ```expand = FALSE``` to remove the padding; otherwise the black rectangle would sit a little bit inside the inset plot. I've also added an extra ```theme``` function to get rid of the legend since we don't need an extra legend in the inset. 
 
 ```{r insets_inset_map , message=FALSE , results="hide"}
 inset_map <- main_map + 

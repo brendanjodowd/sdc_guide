@@ -173,14 +173,16 @@ pre code {
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
 <p>This guide uses <a href="https://github.com/brendanjodowd/maps">maps from my GitHub page</a> produced using shapefiles from <a href="https://data-osi.opendata.arcgis.com/">OSi</a> and <a href="https://www.spatialni.gov.uk/">OSNI</a>.</p>
-<p>Two packages are used throughout, they are <a href="https://tidyverse.tidyverse.org/">tidyverse</a> (actually a collection of packages) and <a href="https://r-spatial.github.io/sf/">sf</a>, which stands for simple features. To install any package run <code>install.packages("package_name")</code>.</p>
-<p>To start, we will need to load both of these packages.</p>
+<p>Two packages are used throughout, they are <a href="https://tidyverse.tidyverse.org/">tidyverse</a> and <a href="https://r-spatial.github.io/sf/">sf</a>. Tidyverse is actually a collection of packages that all work together. One of these is called ggplot2, and this is very useful for making nice plots. sf stands for simple features, it is a package for working with spatial data, and it is designed to be compatible with tidyverse. The spatial data objects that you manipulate with the sf package are called ‘sf objects’. More on that later.</p>
+<p>To install the collection of tidyverse packages (including ggplot2) run <code>install.packages("tidyverse")</code>, and to install the sf package run <code>install.packages("sf")</code>.</p>
+<p>There are alternative packages and approaches in R for producing maps. Other options include the plotting functions in base R and the tmap package. I find that using ggplot2 together with sf offers the best balance of flexibility and ease of use. Alongside the sf package and sf objects there is an older package called sp with associated sp objects, and I would advise against using sp under any circumstances. It has poor compatibility, fewer features and is much more difficult to use.</p>
+<p>To start, we will need to load both the tidyverse packages and the sf package.</p>
 <pre class="r"><code>library(tidyverse)
 library(sf)</code></pre>
 </div>
 <div id="prerequisites" class="section level2">
 <h2>Prerequisites</h2>
-<p>I would like for anyone to be able to begin making their own maps, but some familiarity with R is ideal. I think that in order to produce maps independently you should be able to use the following list of functions. The help function in R is very useful, you can find out about a function using <code>?</code>, for example by entering <code>?select</code>.</p>
+<p>I would like for anyone to be able to begin making their own maps, but some familiarity with R is ideal. I think that in order to produce maps beyond the examples in this guide you should be able to use the following list of functions. The help function in R is very useful, you can find out about a function using <code>?</code>, for example by entering <code>?select</code>.</p>
 <ul>
 <li><code>&lt;-</code> : the assignment operator in R (shortcut Alt -). E.g. <code>x &lt;- 5</code> gives <code>x</code> the value 5.</li>
 <li><code>select()</code> : subsetting columns</li>
@@ -197,8 +199,8 @@ library(sf)</code></pre>
 <h2>Importing maps</h2>
 <p>You <strong>should</strong> be able to import my maps directly from the web, using the following, which will create an object called <code>lea_166</code>.</p>
 <pre class="r"><code>lea_166 &lt;- st_read(&quot;https://raw.githubusercontent.com/brendanjodowd/maps/main/lea_166.geojson&quot;)</code></pre>
-<p>This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total, and a row for each of these, so 167 rows in <code>lea_166</code>. In terms of structure, <code>lea_166</code> is an ‘sf object’, where sf stands for special features (check by running <code>class(lea_166)</code>). This is a special type of dataframe where one of the columns is called <code>geometry</code> and contains the coordinates for the shapes corresponding to that row.</p>
-<p>I say <strong>should</strong> in the above because your organisation might not allow R to access the web in this way. If that’s the case then you can navigate to the URL in the <code>st_read()</code> function, and save that page locally as a .geojson file. Then use the file location on your PC as the argument for <code>st_read()</code>.</p>
+<p>This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total, and a row for each of these, so 167 rows in <code>lea_166</code>. In terms of structure, <code>lea_166</code> is an ‘sf object’, where sf stands for simple features (check by running <code>class(lea_166)</code>). This is a special type of dataframe where one of the columns is called <code>geometry</code> and contains the coordinates for the shapes corresponding to that row.</p>
+<p>I say <strong>should</strong> in the above because your organisation might not allow R to access the web in this way. If that’s the case then you can navigate to the URL in the <code>st_read()</code> function, and save that page locally as a .geojson file. Then use the file location on your PC as the argument for <code>st_read()</code> instead of the URL.</p>
 <p>We will be able to use this map of 166 LEAs (plus Northern Ireland) to create other maps, such as county outlines and NUTS 3 region outlines.</p>
 <p>There are 11 columns within <code>lea_166</code>, they are:</p>
 <ul>
@@ -231,7 +233,7 @@ library(sf)</code></pre>
 </div>
 <div id="first-plot" class="section level2">
 <h2>First plot</h2>
-<p>Let’s take a quick look at the map that we now have using ggplot. ggplot is one of the packages within tidyverse which is very useful for making all kinds of nice plots).</p>
+<p>Let’s take a quick look at the map that we now have using ggplot.</p>
 <pre class="r"><code>ggplot(lea_166) + geom_sf()</code></pre>
 <p><img src="index_files/figure-html/first_plot%20-1.png" width="672" /></p>
 <p>This structure of using <code>ggplot()</code> followed by <code>+ geom_XXX()</code> will be familiar to users of ggplot (<code>XXX</code> here might be <code>line</code>, <code>bar</code> etc. depending on the type of plot).</p>
@@ -262,7 +264,7 @@ ggplot(base_map) +
 </div>
 <div id="colouring-in-selected-areas-of-the-map" class="section level2">
 <h2>Colouring in selected areas of the map</h2>
-<p>Let’s start with the LEA map and let’s say we want all of the LEAs in the Border to be coloured in green. We can make a new dataframe called <code>border_leas</code> using filter as follows:</p>
+<p>Let’s start with the LEA map and let’s say we want all of the LEAs in the Border to be coloured in green. We can make a new dataframe called <code>border_leas</code> using <code>filter</code> as follows:</p>
 <pre class="r"><code>border_leas &lt;- lea_166 %&gt;% 
   filter(NUTS3 == &quot;Border&quot;)</code></pre>
 <p>Now we can plot that as an extra layer on top of our usual LEA map</p>
@@ -274,12 +276,12 @@ ggplot(base_map) +
 <pre class="r"><code>ggplot(lea_166) + 
   geom_sf() +
   geom_sf(data = lea_166 %&gt;% filter(NUTS3 == &quot;Border&quot;) , fill=&quot;green&quot;)</code></pre>
-<p>The filter function is very powerful, and we can include multiple clauses separated by commas. Let’s say we want all LEAs in the Border and South-West NUTS 3 regions or in County Offaly, and excluding the LEA of Kenmare and any LEA that includes the string ‘Cork City’. I know this seems like a silly collection but hopefully it will give you a guide to making your own complex subsets.</p>
+<p>The filter function is very powerful, and we can include multiple clauses separated by commas. Let’s say we want all LEAs in the Border and South-West NUTS 3 regions, and all the LEAs in County Offaly, but we want to exclude the LEA of Kenmare and any LEA which has the string ‘Cork City’ in its name. I know this seems like a silly selection but hopefully it will give you a guide to making your own complex subsets.</p>
 <pre class="r"><code>selected_areas &lt;- lea_166 %&gt;% 
   filter(NUTS3 %in% c(&quot;Border&quot; ,&quot;South-West&quot;) | COUNTY ==&quot;Offaly&quot; , 
          LEA != &quot;Kenmare&quot;, 
          ! str_detect(LEA , &quot;Cork City&quot;)) </code></pre>
-<p>Note the use of <code>!</code> above in front of the <code>str_detect</code> function, which negates or produces the opposite of the logical expression in front of it. You could have used <code>&amp;</code> instead of the commas in the argument of <code>filter</code> above, but using logical AND as well as logical OR can be ambiguous, so you should use extra brackets if doing so. Anyway, let’s plot <code>selected_areas</code>.</p>
+<p>Note the use of <code>!</code> above in front of the <code>str_detect</code> function, which negates or produces the opposite of the logical expression in front of it. You could have used <code>&amp;</code> instead of the commas in the argument of <code>filter</code> above, but using logical AND as well as logical OR can be ambiguous (brackets ought to be used). Anyway, let’s plot <code>selected_areas</code>.</p>
 <pre class="r"><code>ggplot(lea_166) + 
   geom_sf() +
   geom_sf(data = selected_areas , fill=&quot;green&quot;)</code></pre>
@@ -320,7 +322,7 @@ ggplot(lea_166) +
 <p>The function used to save plots is <code>ggsave</code>. By default it saves the last plot displayed. The code below shows how it is used. You can adjust the height, width and units depending on your needs.</p>
 <pre class="r"><code>ggsave(file = &quot;images/map_with_selected_areas.png&quot; , width=18, height = 24, units=&quot;cm&quot;) </code></pre>
 <p>You can save a named plot to file using the using <code>plot =</code> argument within <code>ggsave</code>. Let’s create <code>simple_lea_map</code> and save that.</p>
-<pre class="r"><code>simple_lea_map &lt;- ggplot() + geom_sf(data = lea_166)
+<pre class="r"><code>simple_lea_map &lt;- ggplot(lea_166) + geom_sf()
 
 ggsave(file = &quot;images/simple_lea_map.png&quot; , plot = simple_lea_map, width=18, height = 24, units=&quot;cm&quot;) </code></pre>
 </div>
@@ -405,6 +407,8 @@ ggplot(dublin_map) + geom_sf()</code></pre>
 </div>
 <div id="categorical-colouration" class="section level2">
 <h2>Categorical colouration</h2>
+<p>Suppose we want to plot a categorical variable, perhaps one based on bands of a continuous variable.</p>
+<p>Probably two ways of doing this, one with a new variable that is factorised, and maybe also using some kind of format over the existing variable.</p>
 </div>
 <div id="insets" class="section level2">
 <h2>Insets</h2>
@@ -426,7 +430,7 @@ ggplot(dublin_map) + geom_sf()</code></pre>
 
 main_map</code></pre>
 <p><img src="index_files/figure-html/insets_main_map%20-1.png" width="672" /></p>
-<p>Now let’s make the inset map. It is <code>main_map</code> plus <code>coord_sf</code> to crop to the same coordinates as the black rectangle. Note the use of <code>expand = FALSE</code> to remove the padding; otherwise the black rectangle would sit a little bit inside the inset plot. I’ve also added an extra <code>theme</code> function to get rid of the legend sinmce we don’t need an extra legend in the inset.</p>
+<p>Now let’s make the inset map. It is <code>main_map</code> plus <code>coord_sf</code> to crop to the same coordinates as the black rectangle. Note the use of <code>expand = FALSE</code> to remove the padding; otherwise the black rectangle would sit a little bit inside the inset plot. I’ve also added an extra <code>theme</code> function to get rid of the legend since we don’t need an extra legend in the inset.</p>
 <pre class="r"><code>inset_map &lt;- main_map + 
   coord_sf(xlim = c(-6.65, -5.95), ylim = c(53.18,53.65) , expand=FALSE) +
   theme(legend.position = &quot;none&quot;)  
