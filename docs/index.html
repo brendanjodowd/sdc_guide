@@ -320,16 +320,47 @@ ggsave(file = &quot;images/simple_lea_map.png&quot; , plot = simple_lea_map, wid
 <pre class="r"><code>ggplot() + geom_sf(data = lea_166 , aes(fill=Pop2016))</code></pre>
 <p><img src="index_files/figure-html/chloro_1%20-1.png" width="672" /></p>
 <p>Note the <code>aes()</code> function within <code>geom_sf()</code>. This is for aesthetic mappings, and is very commonly used within ggplot for specifying dimensions. Find out more about this function <a href="https://www.rdocumentation.org/packages/ggplot2/versions/3.3.5/topics/aes">here</a>.</p>
-<p>You’ll see that the colour varies from dark blue to light blue. There are a few easy ways to choose a different range of colours. The first is using <code>scale_fill_distiller</code>:</p>
+<p>You’ll see that the colour varies from dark blue to light blue. There are a few easy ways to choose a different range of colours, and I’ll show two of these here. The first is using <code>scale_fill_distiller</code> which takes an argument <code>palette</code>. Here I’m using the palette <code>YlOrRd</code> which is short for yellow-orange-red. There are 35 different palettes supplied with this function which you can see on the help page for <code>scale_fill_distiller</code>. There are three type of palette: sequential, which are all light to dark and are designed for data that goes from low to high; qualitative, which are for categorical data; and diverging, which have a dark colour at each end and a very light colour in the middle, and these are best suited where the midpoint in the range requires some emphasis.</p>
+<p>There is another argument to <code>scale_fill_distiller</code> that is worth knowing which is <code>direction</code>, and this can be used to flip the palette, e.g. from dark to light instead of light to dark. By default it is equal to <code>-1</code>, so set it to <code>1</code> to reverse.</p>
 <pre class="r"><code>ggplot() + geom_sf(data = lea_166 , aes(fill=Pop2016)) +
-  scale_fill_distiller(palette = &quot;Blues&quot;)</code></pre>
+  scale_fill_distiller(palette = &quot;YlOrRd&quot;)</code></pre>
 <p><img src="index_files/figure-html/chloro_2%20-1.png" width="672" /></p>
+<p>Another useful function for specifying your own gradient is <code>scale_fill_gradient2</code>. This takes three colours for <code>low</code>, <code>mid</code> and <code>high</code>, and then a value for the midpoint (which will take the <code>mid</code> colour). See the example below. You might also be interested in two variations of this function, one simpler and one more complex. The simpler version is <code>scale_fill_gradient</code> which take a high and low colour but no midpoint. Then the more complex version is <code>scale_fill_gradientn</code> which can make a gradient from a longer series of colours passed as a vector to the argument <code>colours =</code> , e.g. <code>scale_fill_gradientn(colours=c("blue", "green", "yellow", "red"))</code>. Often <code>scale_fill_gradientn</code> takes a built-in palette rather than a vector of named colours, e.g. <code>scale_fill_gradientn(colours=rainbow(6))</code>.</p>
 <pre class="r"><code>ggplot() + geom_sf(data = lea_166 , aes(fill=Pop2016)) +
-  scale_fill_gradient2(low = &quot;blue&quot;, high = &quot;red&quot;, mid = &quot;white&quot;, midpoint = 35000)</code></pre>
+  scale_fill_gradient2(low = &quot;blue&quot;, mid = &quot;white&quot;, high = &quot;red&quot;, midpoint = 35000)</code></pre>
 <p><img src="index_files/figure-html/chloro_3%20-1.png" width="672" /></p>
 </div>
 <div id="hatching-and-cross-hatching-regions-in-a-map" class="section level2">
 <h2>Hatching and cross hatching regions in a map</h2>
+<p>Unfortunately there is no built-in means of hatching an area using ggplot, but I found a useful work-around on stack Overflow <a href="https://stackoverflow.com/a/59301874/15703221">here</a>. The code to generate a pattern is shown below. The function <code>hatch_pattern</code> takes three arguments: shape, which is the region (sf object) that you want to show with a hatch; scale, which is a number used to adjust the spacing of the hatch; and pattern which has four options for the direction of the lines in the hatch.</p>
+<pre class="r"><code>hatch_pattern &lt;- function(shape, scale, pattern) {
+  ex = list(
+    horizontal = c(2, 1),
+    vertical = c(1, 4),
+    left2right = c(2, 4),
+    right2left = c(1, 3)
+  )
+  
+  fillgrid = st_make_grid(shape, cellsize = scale)
+  endsf = lapply(1:length(fillgrid), function(j)
+    sf::st_linestring(sf::st_coordinates(fillgrid[j])[ex[[pattern]], 1:2]))
+  endsf = sf::st_sfc(endsf, crs = sf::st_crs(shape))
+  endsf = sf::st_intersection(endsf, shape)
+  endsf = endsf[sf::st_geometry_type(endsf)
+                %in% c(&quot;LINESTRING&quot;, &quot;MULTILINESTRING&quot;)]
+  endsf = sf::st_line_merge(sf::st_union(endsf))
+  return(endsf)
+}</code></pre>
+<p>Now let’s use it to cover County Galway in a green hatch with line from top left to bottom right. I use <code>colour = "green"</code> and <code>size=0.8</code> within the <code>geom_sf()</code> function to control the colour and line thickness respectively.</p>
+<pre class="r"><code>galway_hatch &lt;- hatch_pattern(shape = lea_166 %&gt;% filter(COUNTY==&quot;Galway&quot;), 
+                              scale = 0.1, 
+                              pattern = &quot;left2right&quot;)
+
+ggplot() +
+  geom_sf(data = lea_166) +
+  geom_sf(data = galway_hatch, colour = &quot;green&quot;, size=0.8)</code></pre>
+<p><img src="index_files/figure-html/hatch_galway%20-1.png" width="672" /></p>
+<p>You can make a crosshatch by creating a second hatch having pattern “right2left” and overlaying this with another <code>geom_sf()</code> function.</p>
 </div>
 <div id="plotting-point-locations-in-a-map" class="section level2">
 <h2>Plotting point locations in a map</h2>
