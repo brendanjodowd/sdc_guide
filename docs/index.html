@@ -232,12 +232,20 @@ library(sf)</code></pre>
 <div id="first-plot" class="section level2">
 <h2>First plot</h2>
 <p>Let’s take a quick look at the map that we now have using ggplot. ggplot is one of the packages within tidyverse which is very useful for making all kinds of nice plots).</p>
-<pre class="r"><code>ggplot() + geom_sf(data= lea_166)</code></pre>
+<pre class="r"><code>ggplot(lea_166) + geom_sf()</code></pre>
 <p><img src="index_files/figure-html/first_plot%20-1.png" width="672" /></p>
 <p>This structure of using <code>ggplot()</code> followed by <code>+ geom_XXX()</code> will be familiar to users of ggplot (<code>XXX</code> here might be <code>line</code>, <code>bar</code> etc. depending on the type of plot).</p>
-<p>Note that the following piece of code is equivalent, and doesn’t require <code>data =</code>:</p>
-<pre class="r"><code>ggplot(lea_166) + geom_sf()</code></pre>
-<p>Even though this layout is probably more commonly used, I will be using the previous layout because later on I’ll be using multiple <code>geom_sf()</code> functions to build up a plot in layers, and I find that the dataframe being used is less ambiguous that way.</p>
+<p>Extra layers can be added through additional <code>geom_sf</code> functions, as we shall see later. These additional <code>geom_sf</code> functions will require a <code>data</code> argument to specify the associated dataframe — the first <code>geom_sf</code> takes its dataframe from the initial <code>ggplot</code> function. Thus the code structure for a layered plot looks something like the following.</p>
+<pre class="r"><code># pseudocode 
+ggplot(base_map) + geom_sf() +
+  geom_sf(data = extra_layer) + 
+  geom_sf(data = another_layer)</code></pre>
+<p>You could put <code>base_map</code> into the first <code>geom_sf</code> function with a <code>data</code> argument like the subsequent layers, but (a) that is not the convention that I have seen, and (b) I think it can cause problems not to have any dataframe in <code>ggplot()</code> if you are adding annotations to the plot.</p>
+<!-- Note that the following piece of code is equivalent, and doesn't require ```data = ```: -->
+<!-- ```{r first_plot_alternative , eval=FALSE } -->
+<!-- ggplot(lea_166) + geom_sf() -->
+<!-- ``` -->
+<!-- Even though this layout is probably more commonly used, I will be using the previous layout because later on I'll be using multiple ```geom_sf()``` functions to build up a plot in layers, and I find that the dataframe being used is less ambiguous that way.  -->
 </div>
 <div id="aggregating-up-for-counties-and-nuts-regions" class="section level2">
 <h2>Aggregating up for counties and NUTS regions</h2>
@@ -247,7 +255,7 @@ library(sf)</code></pre>
   summarise(geometry = st_union(geometry) , AREA=sum(AREA))</code></pre>
 <p>Note that <code>county_map</code> has only 3 columns, which are <code>COUNTY</code>, <code>geometry</code> and <code>AREA</code>. <code>AREA</code> is calculated for each county using the <code>sum()</code> function above. You could do something similar for <code>Pop2016</code> if you wished. All other columns are lost in the <code>summarise()</code> step.</p>
 <p>Let’s plot <code>county_map</code> to see what it looks like.</p>
-<pre class="r"><code>ggplot() + geom_sf(data=county_map)</code></pre>
+<pre class="r"><code>ggplot(county_map) + geom_sf()</code></pre>
 <p><img src="index_files/figure-html/county_plot%20-1.png" width="672" /></p>
 <p>Try making a similar plot of the NUTS3 regions.</p>
 </div>
@@ -257,13 +265,13 @@ library(sf)</code></pre>
 <pre class="r"><code>border_leas &lt;- lea_166 %&gt;% 
   filter(NUTS3 == &quot;Border&quot;)</code></pre>
 <p>Now we can plot that as an extra layer on top of our usual LEA map</p>
-<pre class="r"><code>ggplot() + 
-  geom_sf(data = lea_166) +
+<pre class="r"><code>ggplot(lea_166) + 
+  geom_sf() +
   geom_sf(data = border_leas , fill=&quot;green&quot;)</code></pre>
 <p><img src="index_files/figure-html/first_green_plot%20-1.png" width="672" /></p>
 <p>Note that we could have done the filter step within the <code>geom_sf()</code> function if we wanted to, like so:</p>
-<pre class="r"><code>ggplot() + 
-  geom_sf(data = lea_166) +
+<pre class="r"><code>ggplot(lea_166) + 
+  geom_sf() +
   geom_sf(data = lea_166 %&gt;% filter(NUTS3 == &quot;Border&quot;) , fill=&quot;green&quot;)</code></pre>
 <p>The filter function is very powerful, and we can include multiple clauses separated by commas. Let’s say we want all LEAs in the Border and South-West NUTS 3 regions or in County Offaly, and excluding the LEA of Kenmare and any LEA that includes the string ‘Cork City’. I know this seems like a silly collection but hopefully it will give you a guide to making your own complex subsets.</p>
 <pre class="r"><code>selected_areas &lt;- lea_166 %&gt;% 
@@ -271,8 +279,8 @@ library(sf)</code></pre>
          LEA != &quot;Kenmare&quot;, 
          ! str_detect(LEA , &quot;Cork City&quot;)) </code></pre>
 <p>Note the use of <code>!</code> above in front of the <code>str_detect</code> function, which negates or produces the opposite of the logical expression in front of it. You could have used <code>&amp;</code> instead of the commas in the argument of <code>filter</code> above, but using logical AND as well as logical OR can be ambiguous, so you should use extra brackets if doing so. Anyway, let’s plot <code>selected_areas</code>.</p>
-<pre class="r"><code>ggplot() + 
-  geom_sf(data = lea_166) +
+<pre class="r"><code>ggplot(lea_166) + 
+  geom_sf() +
   geom_sf(data = selected_areas , fill=&quot;green&quot;)</code></pre>
 <p><img src="index_files/figure-html/second_green_plot%20-1.png" width="672" /></p>
 </div>
@@ -285,8 +293,8 @@ library(sf)</code></pre>
   group_by(NUTS3) %&gt;% 
   summarise(geometry = st_union(geometry))
 
-ggplot() + 
-  geom_sf(data = lea_166) +
+ggplot(lea_166) + 
+  geom_sf() +
   geom_sf(data = selected_areas , fill=&quot;green&quot;) +
   geom_sf(data = lea_166 %&gt;% filter(COUNTY==&quot;Dublin&quot;) , fill=&quot;blue&quot;) +
   geom_sf(data = nuts_outline , fill= NA , colour=&quot;black&quot;, size=1) +
@@ -296,8 +304,8 @@ ggplot() +
 <div id="creating-named-objects-from-plots" class="section level2">
 <h2>Creating named objects from plots</h2>
 <p>Rather than simply plotting a ggplot object immediately, you can turn it into an object in the R environment with its own name. For example, let’s take the first three lines of the previous <code>ggplot</code> statement and make an object called <code>base_plot</code>:</p>
-<pre class="r"><code>base_plot &lt;- ggplot() + 
-  geom_sf(data = lea_166) +
+<pre class="r"><code>base_plot &lt;- ggplot(lea_166) + 
+  geom_sf() +
   geom_sf(data = selected_areas , fill=&quot;green&quot;) </code></pre>
 <p>Now we can add to this as we please (resulting plot not shown, it’s the same as previous image). You might like to try this approach if you are making several plots which have a certain amount of detail in common.</p>
 <pre class="r"><code>base_plot + 
@@ -316,23 +324,26 @@ ggsave(file = &quot;images/simple_lea_map.png&quot; , plot = simple_lea_map, wid
 </div>
 <div id="plotting-continuous-variables" class="section level2">
 <h2>Plotting continuous variables</h2>
-<p>Let’s say we want to create a map where the colour varies in proportion to a particular variable (a chloropleth). We’ll make one where the colour varies by Population in each LEA, since this is already a column on <code>lea_166</code> (the variable name is Pop2016). We can do that as follows:</p>
-<pre class="r"><code>ggplot() + geom_sf(data = lea_166 , aes(fill=Pop2016))</code></pre>
+<p>Let’s say we want to create a map where the colour varies in proportion to a particular variable (a chloropleth). We’ll make one where the colour varies by population in each LEA, since this is already a column on <code>lea_166</code> (the variable name is Pop2016). We can do that as follows:</p>
+<pre class="r"><code>ggplot(lea_166) + 
+  geom_sf(aes(fill=Pop2016))</code></pre>
 <p><img src="index_files/figure-html/chloro_1%20-1.png" width="672" /></p>
 <p>Note the <code>aes()</code> function within <code>geom_sf()</code>. This is for aesthetic mappings, and is very commonly used within ggplot for specifying dimensions. Find out more about this function <a href="https://www.rdocumentation.org/packages/ggplot2/versions/3.3.5/topics/aes">here</a>.</p>
-<p>You’ll see that the colour varies from dark blue to light blue. There are a few easy ways to choose a different range of colours, and I’ll show two of these here. The first is using <code>scale_fill_distiller</code> which takes an argument <code>palette</code>. Here I’m using the palette <code>YlOrRd</code> which is short for yellow-orange-red. There are 35 different palettes supplied with this function which you can see on the help page for <code>scale_fill_distiller</code>. There are three type of palette: sequential, which are all light to dark and are designed for data that goes from low to high; qualitative, which are for categorical data; and diverging, which have a dark colour at each end and a very light colour in the middle, and these are best suited where the midpoint in the range requires some emphasis.</p>
+<p>You’ll see that the colour varies from dark blue to light blue. There are a few easy ways to choose a different range of colours, and I’ll show two of these here. The first is using <code>scale_fill_distiller</code> which takes an argument <code>palette</code>. Here I’m using the palette <code>YlOrRd</code> which is short for yellow-orange-red. There are 35 different palettes supplied with this function which you can see on the help page for <code>scale_fill_distiller</code>. There are three type of palette: sequential, which are all light to dark and are designed for data that goes from low to high; qualitative, which are a mix of contrasting colours used for categorical data; and diverging, which have a dark colour at each end and a very light colour in the middle, and these are best suited where the midpoint in the range requires some emphasis.</p>
 <p>There is another argument to <code>scale_fill_distiller</code> that is worth knowing which is <code>direction</code>, and this can be used to flip the palette, e.g. from dark to light instead of light to dark. By default it is equal to <code>-1</code>, so set it to <code>1</code> to reverse.</p>
-<pre class="r"><code>ggplot() + geom_sf(data = lea_166 , aes(fill=Pop2016)) +
+<pre class="r"><code>ggplot(lea_166) + 
+  geom_sf(aes(fill=Pop2016)) +
   scale_fill_distiller(palette = &quot;YlOrRd&quot;)</code></pre>
 <p><img src="index_files/figure-html/chloro_2%20-1.png" width="672" /></p>
-<p>Another useful function for specifying your own gradient is <code>scale_fill_gradient2</code>. This takes three colours for <code>low</code>, <code>mid</code> and <code>high</code>, and then a value for the midpoint (which will take the <code>mid</code> colour). See the example below. You might also be interested in two variations of this function, one simpler and one more complex. The simpler version is <code>scale_fill_gradient</code> which take a high and low colour but no midpoint. Then the more complex version is <code>scale_fill_gradientn</code> which can make a gradient from a longer series of colours passed as a vector to the argument <code>colours =</code> , e.g. <code>scale_fill_gradientn(colours=c("blue", "green", "yellow", "red"))</code>. Often <code>scale_fill_gradientn</code> takes a built-in palette rather than a vector of named colours, e.g. <code>scale_fill_gradientn(colours=rainbow(6))</code>.</p>
-<pre class="r"><code>ggplot() + geom_sf(data = lea_166 , aes(fill=Pop2016)) +
+<p>Another useful function for specifying your own gradient is <code>scale_fill_gradient2</code>. This takes three colours for <code>low</code>, <code>mid</code> and <code>high</code>, and then a value for the midpoint (which will take the <code>mid</code> colour). See the example below. You might also be interested in two variations of this function, one simpler and one more complex. The simpler version is <code>scale_fill_gradient</code> which takes a high and low colour but no midpoint. Then the more complex version is <code>scale_fill_gradientn</code> which can make a gradient from a longer series of colours passed as a vector to the argument <code>colours =</code> , e.g. <code>scale_fill_gradientn(colours=c("blue", "green", "yellow", "red"))</code>. Often <code>scale_fill_gradientn</code> takes a built-in palette rather than a vector of named colours, e.g. <code>scale_fill_gradientn(colours=rainbow(6))</code>.</p>
+<pre class="r"><code>ggplot(lea_166) + 
+  geom_sf(aes(fill=Pop2016)) +
   scale_fill_gradient2(low = &quot;blue&quot;, mid = &quot;white&quot;, high = &quot;red&quot;, midpoint = 35000)</code></pre>
 <p><img src="index_files/figure-html/chloro_3%20-1.png" width="672" /></p>
 </div>
 <div id="hatching-and-cross-hatching-regions-in-a-map" class="section level2">
 <h2>Hatching and cross hatching regions in a map</h2>
-<p>Unfortunately there is no built-in means of hatching an area using ggplot, but I found a useful work-around on stack Overflow <a href="https://stackoverflow.com/a/59301874/15703221">here</a>. The code to generate a pattern is shown below. The function <code>hatch_pattern</code> takes three arguments: shape, which is the region (sf object) that you want to show with a hatch; scale, which is a number used to adjust the spacing of the hatch; and pattern which has four options for the direction of the lines in the hatch.</p>
+<p>Unfortunately there is no built-in means of hatching an area using ggplot, but I found a useful work-around on Stack Overflow <a href="https://stackoverflow.com/a/59301874/15703221">here</a>. The code to generate a pattern is shown below. The function <code>hatch_pattern</code> takes three arguments: shape, which is the region (sf object) that you want to show with a hatch; scale, which is a number used to adjust the spacing of the hatch; and pattern which has four options for the direction of the lines in the hatch.</p>
 <pre class="r"><code>hatch_pattern &lt;- function(shape, scale, pattern) {
   ex = list(
     horizontal = c(2, 1),
@@ -356,11 +367,42 @@ ggsave(file = &quot;images/simple_lea_map.png&quot; , plot = simple_lea_map, wid
                               scale = 0.1, 
                               pattern = &quot;left2right&quot;)
 
-ggplot() +
-  geom_sf(data = lea_166) +
+ggplot(lea_166) +
+  geom_sf() +
   geom_sf(data = galway_hatch, colour = &quot;green&quot;, size=0.8)</code></pre>
 <p><img src="index_files/figure-html/hatch_galway%20-1.png" width="672" /></p>
 <p>You can make a crosshatch by creating a second hatch having pattern “right2left” and overlaying this with another <code>geom_sf()</code> function.</p>
+</div>
+<div id="zooming-in-on-an-area" class="section level2">
+<h2>Zooming in on an area</h2>
+<p>We need to distinguish between two types of zooming in here. One kind of zoom is where we plot just one subset of the map, and the other is where the whole map “exists” but we are cropping out a specific piece.</p>
+<p>Let do the first kind of zoom where we plot just the LEAs in County Dublin.</p>
+<pre class="r"><code>dublin_map &lt;- lea_166 %&gt;% filter(COUNTY==&quot;Dublin&quot;)
+
+ggplot(dublin_map) + geom_sf()</code></pre>
+<p><img src="index_files/figure-html/dublin_map%20-1.png" width="672" /></p>
+<p>Now let’s do the type where the map is cropped. This is achieved using <code>coord_sf</code>. Note the negative values in <code>xlim()</code> since we are west of the Greenwich meridian. If you look closely you will notice that the full extent of the map is a little bit larger than the area specified by the limits provided, there is a certain amount of ‘padding’ on all four sides. This ‘expand’ feature is on by default, but can be turned off by adding <code>expand = FALSE</code> to the <code>coord_sf</code> function.</p>
+<pre class="r"><code>ggplot(lea_166) + 
+  geom_sf() +
+  coord_sf(xlim = c(-6.65,-5.95) , ylim = c(53.18, 53.65))</code></pre>
+<p><img src="index_files/figure-html/dublin_crop%20-1.png" width="672" /></p>
+</div>
+<div id="categorical-colouration" class="section level2">
+<h2>Categorical colouration</h2>
+</div>
+<div id="insets" class="section level2">
+<h2>Insets</h2>
+<p>Let’s say that we want a map with an inset for Dublin City. The easiest way I have found for doing this is using the <a href="https://www.rdocumentation.org/packages/cowplot/versions/1.1.1">cowplot package</a>, which helps you to make compound images. We will create our map for the whole country and then add a layer on top of this for our inset using the <code>draw_plot</code> function from cowplot.</p>
+<p>We’ll start by making a map for the whole country. We’ll use the first example from the gradient colour guide above and create a named object from it called <code>my_map</code>. We’ll need to make a couple of alterations for this plot. First we’ll add <code>theme_void()</code> to get rid of the axes. Then we’ll add a black rectangle to the map around the Dublin City area so that users know where the inset is from. Finally we need to move the legend up to the top right, because I’d like my inset to sit close to Dublin where the legend normally is.</p>
+<pre class="r"><code>my_map &lt;- ggplot(lea_166) + 
+  geom_sf(aes(fill=Pop2016)) +
+  scale_fill_distiller(palette = &quot;YlOrRd&quot;) + 
+  theme_void() +
+  geom_rect(xmin = -6.6, xmax = -6 , ymin = 53.2 , ymax = 53.6 , 
+            fill = NA, size = 0.6 , colour = &quot;black&quot;)
+
+my_map</code></pre>
+<p><img src="index_files/figure-html/insets%20-1.png" width="672" /></p>
 </div>
 <div id="plotting-point-locations-in-a-map" class="section level2">
 <h2>Plotting point locations in a map</h2>
