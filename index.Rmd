@@ -147,7 +147,7 @@ selected_areas <- lea_166 %>%
          ! str_detect(LEA , "Cork City")) 
 ```
 
-Note the use of ```!``` above in front of the ```str_detect``` function, which negates or produces the opposite of the logical expression in front of it. You could have used ```&``` instead of the commas in the argument of ```filter``` above, but using logical AND as well as logical OR can be unambiguous, so you should use extra brackets if doing so. Anyway, let's plot ```selected_areas```. 
+Note the use of ```!``` above in front of the ```str_detect``` function, which negates or produces the opposite of the logical expression in front of it. You could have used ```&``` instead of the commas in the argument of ```filter``` above, but using logical AND as well as logical OR can be ambiguous, so you should use extra brackets if doing so. Anyway, let's plot ```selected_areas```. 
 
 ```{r second_green_plot , message=FALSE , results="hide"}
 ggplot() + 
@@ -176,7 +176,7 @@ ggplot() +
   theme_void()
 ```
 
-## Assigning plots to an object with a name
+## Creating named objects from plots
 
 Rather than simply plotting a ggplot object immediately, you can turn it into an object in the R environment with its own name. For example, let's take the first three lines of the previous ```ggplot``` statement and make an object called ```base_plot```:
 
@@ -186,9 +186,9 @@ base_plot <- ggplot() +
   geom_sf(data = selected_areas , fill="green") 
 ```
 
-Now we can add to this as we please (resulting plot not shown, same as previous image). You might like to try this approach if you are making several plots which have a certain amount of detail in common. 
+Now we can add to this as we please (resulting plot not shown, it's the same as previous image). You might like to try this approach if you are making several plots which have a certain amount of detail in common. 
 
-```{r base_plot_2 , message=FALSE , results="hide"}
+```{r base_plot_2 , eval=FALSE }
 base_plot + 
   geom_sf(data = lea_166 %>% filter(COUNTY=="Dublin") , fill="blue") +
   geom_sf(data = nuts_outline , fill= NA , colour="black", size=1) +
@@ -197,16 +197,51 @@ base_plot +
 
 ## Saving plots
 
-The function used to save plots is ```ggsave```. By default it saves the last plot displayed. Here is how it is used:
+The function used to save plots is ```ggsave```. By default it saves the last plot displayed. The code below shows how it is used. You can adjust the height, width and units depending on your needs. 
 
 ```{r ggsave , message=FALSE , results="hide"}
 ggsave(file = "images/map_with_selected_areas.png" , width=18, height = 24, units="cm") 
 ```
 
-You can save a named plot to file by creating a named object from a ```ggplot``` statement and passing that to ```ggsave``` using ```plot = ```
+You can save a named plot to file using the using ```plot = ``` argument within ```ggsave```. Let's create ```simple_lea_map``` and save that. 
 
 ```{r ggsave_2 , eval=FALSE}
 simple_lea_map <- ggplot() + geom_sf(data = lea_166)
 
 ggsave(file = "images/simple_lea_map.png" , plot = simple_lea_map, width=18, height = 24, units="cm") 
 ```
+
+## Plotting continuous variables
+
+Let's say we want to create a map where the colour varies in proportion to a particular variable (a chloropleth). We'll make one where the colour varies by Population in each LEA, since this is already a column on ```lea_166``` (the variable name is Pop2016). We can do that as follows:
+
+```{r chloro_1 , message=FALSE , results="hide"}
+ggplot() + geom_sf(data = lea_166 , aes(fill=Pop2016))
+```
+
+Note the ```aes()``` function within ```geom_sf()```. This is for aesthetic mappings, and is very commonly used within ggplot for specifying dimensions. Find out more about this function [here](https://www.rdocumentation.org/packages/ggplot2/versions/3.3.5/topics/aes). 
+
+You'll see that the colour varies from dark blue to light blue. There are a few easy ways to choose a different range of colours. The first is using ```scale_fill_distiller```:
+
+```{r chloro_2 , message=FALSE , results="hide"}
+ggplot() + geom_sf(data = lea_166 , aes(fill=Pop2016)) +
+  scale_fill_distiller(palette = "Blues")
+```
+
+```{r chloro_3 , message=FALSE , results="hide"}
+ggplot() + geom_sf(data = lea_166 , aes(fill=Pop2016)) +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 35000)
+```
+
+## Hatching and cross hatching regions in a map
+
+## Plotting point locations in a map
+
+How to import a csv and convert it so an sf object.
+
+## Assigning point locations to regions in the map
+
+
+## Overlapping areas and calculating area
+
+Create a file for Gaeltacht areas. 
