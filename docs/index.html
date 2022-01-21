@@ -237,7 +237,8 @@ library(sf)</code></pre>
 <p>This structure of using <code>ggplot()</code> followed by <code>+ geom_XXX()</code> will be familiar to users of ggplot (<code>XXX</code> here might be <code>line</code>, <code>bar</code> etc. depending on the type of plot).</p>
 <p>Extra layers can be added through additional <code>geom_sf</code> functions, as we shall see later. These additional <code>geom_sf</code> functions will require a <code>data</code> argument to specify the associated dataframe — the first <code>geom_sf</code> takes its dataframe from the initial <code>ggplot</code> function. Thus the code structure for a layered plot looks something like the following.</p>
 <pre class="r"><code># pseudocode 
-ggplot(base_map) + geom_sf() +
+ggplot(base_map) + 
+  geom_sf() +
   geom_sf(data = extra_layer) + 
   geom_sf(data = another_layer)</code></pre>
 <p>You could put <code>base_map</code> into the first <code>geom_sf</code> function with a <code>data</code> argument like the subsequent layers, but (a) that is not the convention that I have seen, and (b) I think it can cause problems not to have any dataframe in <code>ggplot()</code> if you are adding annotations to the plot.</p>
@@ -287,6 +288,7 @@ ggplot(base_map) + geom_sf() +
 <div id="adding-more-layers-and-using-theme_void" class="section level2">
 <h2>Adding more layers and using <code>theme_void()</code></h2>
 <p>Let’s take the previous map and add dark outlines for the NUTS 3 regions. I’m going to set <code>fill</code> to <code>NA</code> which means it won’t have any fill colour, then set the line colour to black using <code>colour="black"</code>, and I’ll set the line width to 1 using <code>size=1</code>.</p>
+<p>Note that in ggplot, <code>fill</code> always refers to the colour used to fill in shapes, and <code>colour</code> always refers to line colours. Most of the functions you’ll see which contain the term <code>fill</code> will have an analagous version with <code>colour</code> and vice versa.</p>
 <p>Let’s add another coloured layer, we’ll make all of Dublin blue. The line of code for this will need to go before the NUTS 3 outline, otherwise it will partially obscure that outline.</p>
 <p>I’m also going to add <code>theme_void()</code> here. With ggplot there are lots of different themes you can add to change the appearance of your plot, but for maps the only one I really use is <code>theme_void()</code>. It’s effect is to remove the axes and give you a clear background.</p>
 <pre class="r"><code>nuts_outline &lt;- lea_166 %&gt;% 
@@ -341,6 +343,18 @@ ggsave(file = &quot;images/simple_lea_map.png&quot; , plot = simple_lea_map, wid
   scale_fill_gradient2(low = &quot;blue&quot;, mid = &quot;white&quot;, high = &quot;red&quot;, midpoint = 35000)</code></pre>
 <p><img src="index_files/figure-html/chloro_3%20-1.png" width="672" /></p>
 </div>
+<div id="legend-title-and-format" class="section level2">
+<h2>Legend title and format</h2>
+<p>The map above is nice, but we would probably prefer if the legend title said “Population” instead of “Pop2016”. Labels for any dimension are easily specified using the <code>labs</code> function.</p>
+<p>I also want to adjust the appearance of the numbers in the legend so that they have a thousand comma separator. In other ciurcumstances you might want to format the variable with a percent symbol. This is best handled using the <a href="https://scales.r-lib.org/">scales</a> package, which has some very useful functions for formatting numbers generally. We can add <code>label = comma</code> to whatever <code>scale_fill_...</code> function is being used (use <code>scale_fill_continuous()</code> if no other <code>scale_fill_...</code> function is used).</p>
+<pre class="r"><code>library(scales)
+
+ggplot(lea_166) + 
+  geom_sf(aes(fill=Pop2016)) +
+  scale_fill_distiller(palette = &quot;YlOrRd&quot; , label = comma) +
+  labs(fill = &quot;Population&quot;)  </code></pre>
+<p><img src="index_files/figure-html/title_format%20-1.png" width="672" /></p>
+</div>
 <div id="hatching-and-cross-hatching-regions-in-a-map" class="section level2">
 <h2>Hatching and cross hatching regions in a map</h2>
 <p>Unfortunately there is no built-in means of hatching an area using ggplot, but I found a useful work-around on Stack Overflow <a href="https://stackoverflow.com/a/59301874/15703221">here</a>. The code to generate a pattern is shown below. The function <code>hatch_pattern</code> takes three arguments: shape, which is the region (sf object) that you want to show with a hatch; scale, which is a number used to adjust the spacing of the hatch; and pattern which has four options for the direction of the lines in the hatch.</p>
@@ -371,7 +385,8 @@ ggplot(lea_166) +
   geom_sf() +
   geom_sf(data = galway_hatch, colour = &quot;green&quot;, size=0.8)</code></pre>
 <p><img src="index_files/figure-html/hatch_galway%20-1.png" width="672" /></p>
-<p>You can make a crosshatch by creating a second hatch having pattern “right2left” and overlaying this with another <code>geom_sf()</code> function.</p>
+<p>If you are being finnicky you might like to add <code>lea_166</code> again in another <code>geom_sf</code> layer, this time with <code>fill = NA</code>, so that the LEA boundaries lie on top of the hatch, and not the other way around.</p>
+<p>You can make a crosshatch by creating a second hatch with pattern “right2left” and overlaying this with another <code>geom_sf</code> function.</p>
 </div>
 <div id="zooming-in-on-an-area" class="section level2">
 <h2>Zooming in on an area</h2>
@@ -381,7 +396,8 @@ ggplot(lea_166) +
 
 ggplot(dublin_map) + geom_sf()</code></pre>
 <p><img src="index_files/figure-html/dublin_map%20-1.png" width="672" /></p>
-<p>Now let’s do the type where the map is cropped. This is achieved using <code>coord_sf</code>. Note the negative values in <code>xlim()</code> since we are west of the Greenwich meridian. If you look closely you will notice that the full extent of the map is a little bit larger than the area specified by the limits provided, there is a certain amount of ‘padding’ on all four sides. This ‘expand’ feature is on by default, but can be turned off by adding <code>expand = FALSE</code> to the <code>coord_sf</code> function.</p>
+<p>Now let’s do the type where the map is cropped. This is achieved using <code>coord_sf</code>, wherein the limits are defined using <code>xlim</code> and <code>ylim</code>. Note the negative values in <code>xlim()</code> since we are west of the Greenwich meridian.</p>
+<p>If you look closely at the plot you will notice that the full extent of the map is a little bit larger than the area specified by the limits provided, there is a certain amount of ‘padding’ on all four sides. This ‘expand’ feature is on by default, but can be turned off by adding <code>expand = FALSE</code> to the <code>coord_sf</code> function.</p>
 <pre class="r"><code>ggplot(lea_166) + 
   geom_sf() +
   coord_sf(xlim = c(-6.65,-5.95) , ylim = c(53.18, 53.65))</code></pre>
@@ -393,16 +409,37 @@ ggplot(dublin_map) + geom_sf()</code></pre>
 <div id="insets" class="section level2">
 <h2>Insets</h2>
 <p>Let’s say that we want a map with an inset for Dublin City. The easiest way I have found for doing this is using the <a href="https://www.rdocumentation.org/packages/cowplot/versions/1.1.1">cowplot package</a>, which helps you to make compound images. We will create our map for the whole country and then add a layer on top of this for our inset using the <code>draw_plot</code> function from cowplot.</p>
-<p>We’ll start by making a map for the whole country. We’ll use the first example from the gradient colour guide above and create a named object from it called <code>my_map</code>. We’ll need to make a couple of alterations for this plot. First we’ll add <code>theme_void()</code> to get rid of the axes. Then we’ll add a black rectangle to the map around the Dublin City area so that users know where the inset is from. Finally we need to move the legend up to the top right, because I’d like my inset to sit close to Dublin where the legend normally is.</p>
-<pre class="r"><code>my_map &lt;- ggplot(lea_166) + 
+<p>We’ll start by making a map for the whole country. We’ll use the first example from the gradient colour guide above and create a named object from it called <code>main_map</code>. We’ll need to make a couple of alterations for this plot. First we’ll add <code>theme_void()</code> to get rid of the axes. Then we’ll add a black rectangle to the map around the Dublin City area so that users know where the inset is from.</p>
+<p>Finally, before we add the inset layer, I want to make the legend smaller and move it up to the top left corner so that the inset can sit close to Dublin where the default legend position is. Fortunately, it is possible to tune the size of all the components of the legend (text, title, colour bar), but unfortunately it is not possible to scale the whole legend all at once — each component must be scaled individually. This is done within the <code>theme</code> function as shown below.</p>
+<pre class="r"><code>main_map &lt;- ggplot(lea_166) + 
   geom_sf(aes(fill=Pop2016)) +
   scale_fill_distiller(palette = &quot;YlOrRd&quot;) + 
   theme_void() +
-  geom_rect(xmin = -6.6, xmax = -6 , ymin = 53.2 , ymax = 53.6 , 
-            fill = NA, size = 0.6 , colour = &quot;black&quot;)
+  # Adding the rectangle. 
+  geom_rect(xmin = -6.65, xmax = -5.95 , ymin = 53.18 , ymax = 53.65 , 
+            fill = NA, size = 0.6 , colour = &quot;black&quot;) +
+  # Adjusting the legend. 
+  theme(legend.position = c(0,0.8) ,  # x-y coords for legend position (zero to one)
+        legend.key.size = unit(0.4, &quot;cm&quot;), # size of colour bar
+        legend.text = element_text(size=7), # size of text in legend
+        legend.title = element_text(size=7)) # size of legend title
 
-my_map</code></pre>
-<p><img src="index_files/figure-html/insets%20-1.png" width="672" /></p>
+main_map</code></pre>
+<p><img src="index_files/figure-html/insets_main_map%20-1.png" width="672" /></p>
+<p>Now let’s make the inset map. It is <code>main_map</code> plus <code>coord_sf</code> to crop to the same coordinates as the black rectangle. Note the use of <code>expand = FALSE</code> to remove the padding; otherwise the black rectangle would sit a little bit inside the inset plot. I’ve also added an extra <code>theme</code> function to get rid of the legend sinmce we don’t need an extra legend in the inset.</p>
+<pre class="r"><code>inset_map &lt;- main_map + 
+  coord_sf(xlim = c(-6.65, -5.95), ylim = c(53.18,53.65) , expand=FALSE) +
+  theme(legend.position = &quot;none&quot;)  
+
+inset_map</code></pre>
+<p><img src="index_files/figure-html/insets_inset_map%20-1.png" width="672" /></p>
+<p>Now we can produce the finished product with the <code>main_map</code> and the <code>inset_map</code>. We use <code>ggdraw</code> and <code>draw_plot</code> as shown below. The other arguments to <code>draw_plot</code> (<code>x</code>, <code>y</code>, <code>width</code>, <code>height</code>) provide the size and position of the inset relative to the plot area.</p>
+<pre class="r"><code>library(cowplot)
+
+ggdraw(main_map) + 
+  draw_plot({inset_map} , x = 0.65, y = 0.35 , width = 0.35, height = 0.4) </code></pre>
+<p><img src="index_files/figure-html/inset_map_complete%20-1.png" width="672" /></p>
+<p>Here is a <a href="https://upgo.lab.mcgill.ca/2019/12/13/making-beautiful-maps/">guide to inset maps</a> that I found helpful.</p>
 </div>
 <div id="plotting-point-locations-in-a-map" class="section level2">
 <h2>Plotting point locations in a map</h2>
