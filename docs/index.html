@@ -185,13 +185,14 @@ library(sf)</code></pre>
 <p>I would like for anyone to be able to begin making their own maps, but some familiarity with R is ideal. I think that in order to produce maps beyond the examples in this guide you should be able to use the following list of functions. The help function in R is very useful, you can find out about a function using <code>?</code>, for example by entering <code>?select</code>.</p>
 <ul>
 <li><code>&lt;-</code> : the assignment operator in R (shortcut Alt -). E.g. <code>x &lt;- 5</code> gives <code>x</code> the value 5.</li>
+<li><code>$</code> : operator to extract one variable in a dataset, e.g. <code>my_data$some_column</code> returns <code>some_column</code> from the dataframe <code>my_data</code>.</li>
 <li><code>select()</code> : subsetting columns</li>
 <li><code>filter()</code> : subsetting rows</li>
 <li><code>mutate()</code> : create new variables</li>
 <li><code>group_by()</code> : prepares a dataframe for operations to be carried out on groups of variables. Use <code>ungroup()</code> to remove grouping.</li>
 <li><code>%&gt;%</code> : this is the ‘pipe’ (shortcut Ctrl Shift m), it is a tool for pushing an object through a series of operations. It makes code easier to read and write.</li>
 <li><code>c()</code> : create a vector.</li>
-<li>Logical operators like <code>==</code> (equal to) <code>!=</code> (not equal to) <code>&amp;</code> (and) <code>|</code> (or) <code>%in%</code> (in, I use this a lot to see if a string is in a vector of strings).</li>
+<li>Boolean operators like <code>==</code> (equal to) <code>!=</code> (not equal to) <code>&amp;</code> (and) <code>|</code> (or) <code>%in%</code> (in, I use this a lot to see if a string is in a vector of strings).</li>
 </ul>
 <p>Not an absolute necessity, but I find myself doing a lot of string matching when I’m making maps in R, and for that I use the <code>str_detect()</code> function. A very useful resource is the ‘String manipulation with stringr cheatsheet’, available on the <a href="https://www.rstudio.com/resources/cheatsheets/">RStudio Cheatsheets page</a>.</p>
 </div>
@@ -347,14 +348,13 @@ ggsave(file = &quot;images/simple_lea_map.png&quot; , plot = simple_lea_map, wid
 </div>
 <div id="legend-title-and-format" class="section level2">
 <h2>Legend title and format</h2>
-<p>The map above is nice, but we would probably prefer if the legend title said “Population” instead of “Pop2016”. Labels for any dimension are easily specified using the <code>labs</code> function.</p>
-<p>I also want to adjust the appearance of the numbers in the legend so that they have a thousand comma separator. In other ciurcumstances you might want to format the variable with a percent symbol. This is best handled using the <a href="https://scales.r-lib.org/">scales</a> package, which has some very useful functions for formatting numbers generally. We can add <code>label = comma</code> to whatever <code>scale_fill_...</code> function is being used (use <code>scale_fill_continuous()</code> if no other <code>scale_fill_...</code> function is used).</p>
+<p>The map above is nice, but we would probably prefer if the legend title said “Population” instead of “Pop2016”. If you are using a <code>scale_fill_...</code> function then the easiest thing is to add <code>name = "Population"</code> to that function. Otherwise you can specify a label for any plot dimension, including fill colour, using the <code>labs</code> function. For fill colour that would look like <code>labs(fill = "Population")</code>.</p>
+<p>I also want to adjust the appearance of the numbers in the legend so that they have a thousand comma separator. In other circumstances you might want to format the variable with a percent symbol. This is best handled using the <a href="https://scales.r-lib.org/">scales</a> package, which has some very useful functions for formatting numbers generally. We can add <code>label = comma</code> to whatever <code>scale_fill_...</code> function is being used (use <code>scale_fill_continuous()</code> if no other <code>scale_fill_...</code> function is used). If your continuous variable was from zero to one but you wanted it as a percentage then you would use <code>label = percent</code>.</p>
 <pre class="r"><code>library(scales)
 
 ggplot(lea_166) + 
   geom_sf(aes(fill=Pop2016)) +
-  scale_fill_distiller(palette = &quot;YlOrRd&quot; , label = comma) +
-  labs(fill = &quot;Population&quot;)  </code></pre>
+  scale_fill_distiller(palette = &quot;YlOrRd&quot; , label = comma, name=&quot;Population&quot;)</code></pre>
 <p><img src="index_files/figure-html/title_format%20-1.png" width="672" /></p>
 </div>
 <div id="hatching-and-cross-hatching-regions-in-a-map" class="section level2">
@@ -405,10 +405,43 @@ ggplot(dublin_map) + geom_sf()</code></pre>
   coord_sf(xlim = c(-6.65,-5.95) , ylim = c(53.18, 53.65))</code></pre>
 <p><img src="index_files/figure-html/dublin_crop%20-1.png" width="672" /></p>
 </div>
-<div id="categorical-colouration" class="section level2">
-<h2>Categorical colouration</h2>
-<p>Suppose we want to plot a categorical variable, perhaps one based on bands of a continuous variable.</p>
-<p>Probably two ways of doing this, one with a new variable that is factorised, and maybe also using some kind of format over the existing variable.</p>
+<div id="sequential-colours-for-ordinal-variables" class="section level2">
+<h2>Sequential colours for ordinal variables</h2>
+<p>Suppose we want to plot a map with an ordinal variable, which is like a category but has some ordering from low to high. We might make an ordinal variable from a continuous variable by assigning values into bands. A good example here would be population density. Let’s make a new column for population density and try to plot it.</p>
+<pre class="r"><code>map_with_density &lt;- lea_166 %&gt;% 
+  mutate(pop_density = Pop2016/AREA)
+
+ggplot(map_with_density) + geom_sf(aes(fill=pop_density))</code></pre>
+<p><img src="index_files/figure-html/pop_dens_1%20-1.png" width="672" /></p>
+<p>As we can see this is pretty unsatisfactory, too much of the detail is squashed into the top of the scale. It would make more sense to divide LEAs into bands with roughly equal numbers in each. There are tools for dividing a continuous scale into quintiles, but I prefer to specify the bands myself so that the breaks are nice rounded figures.</p>
+<p>We can make a new variables called <code>density_band</code> from <code>pop_density</code> using the <code>cut</code> function. See how the first value is the variable to make intervals from, then it has arguments <code>breaks</code> and <code>labels</code> each of which takes a vector. Note that the vector for <code>breaks</code> must be one element longer than that for <code>labels</code>.</p>
+<p>The important thing about the <code>cut</code> function is that the value it creates is a <strong>factor</strong>. Factors are used to represent categorical data and they can have an underlying order applied to them. When we plot a factor using <code>ggplot</code> it will take that order into account when applying the palette and creating the legend. In this case the order is determined by our vectors <code>break</code> and <code>labels</code>.</p>
+<pre class="r"><code>map_with_density &lt;- lea_166 %&gt;% 
+  mutate(pop_density = Pop2016/AREA) %&gt;% 
+  mutate(density_band = cut(pop_density , 
+                                         breaks = c(0,10,50,100,500,1000,10000),
+                                         labels = c(&quot;0-9&quot;, &quot;10-49&quot;, &quot;50-99&quot;, &quot;100-499&quot;,&quot;500-999&quot;, &quot;1000+&quot;)))</code></pre>
+<p>The structure of a factor is a little bit complicated. Very briefly, the labels that we make are a character attribute associated with the variable, and the underlying data is stored as a series of numbers. The following three lines of code might illustrate this better. The first line prints the first five entries of <code>density_band</code>, but it also shows the six labels associated with <code>density_band</code>. The second line of code uses <code>as.integer</code> to extract the internal codes for those first ten entries. Note that 1 corresponds to <code>"0-9"</code>, 2 corresponds to <code>"10-49"</code>, etc. Finally, the last line here uses the function <code>levels</code> to return the levels of the factor.</p>
+<pre class="r"><code>map_with_density$density_band[1:10]
+
+map_with_density$density_band[1:10] %&gt;% as.integer()
+
+levels(map_with_density$density_band)</code></pre>
+<p>Anyway, let’s plot <code>density_band</code>.</p>
+<pre class="r"><code>ggplot(map_with_density) + 
+  geom_sf(aes(fill=density_band)) + 
+  scale_fill_brewer(palette=&quot;YlOrBr&quot;) +
+  theme_void()</code></pre>
+<p><img src="index_files/figure-html/density_band_plot%20-1.png" width="672" /></p>
+<p>I’m just going to add one or two more bits to spruce up this plot. I would like the NA colour (for Northern Ireland) to be a more distinctive colour so it’s not confused with the <code>"0-19"</code> band. This is done using the <code>na.value</code> argument. However I’d also like to remove the NA from the legend. I’ll do that by specifying <code>limits</code> in the <code>scale_fill_brewer</code> function. The <code>limits</code> function puts limits on what the scale will cover, anything outside of those limits will not appear in the legend. I’ll set the limits to be equal to the levels of the variable <code>density_band</code>, that way the NA will disappear from the legend. Finally, I’m going to use <code>name =</code> in the <code>scale_fill_brewer</code> function to make a nice title for the legend. This time however, I’m using the function <code>expression</code> within the <code>name =</code> argument because I want to insert a squared symbol for km<sup>2</sup>.</p>
+<pre class="r"><code>ggplot(map_with_density) + 
+  geom_sf(aes(fill=density_band)) + 
+  scale_fill_brewer(palette=&quot;YlOrBr&quot;, 
+                    na.value = &quot;grey&quot;,
+                    limits = levels(map_with_density$density_band),
+                    name = expression(Pop~per~km^2)) +
+  theme_void()</code></pre>
+<p><img src="index_files/figure-html/density_band_plot_2%20-1.png" width="672" /></p>
 </div>
 <div id="insets" class="section level2">
 <h2>Insets</h2>
