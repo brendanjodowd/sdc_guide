@@ -33,8 +33,15 @@ library(sf)
 
 ## Prerequisites
 
-I would like for anyone to be able to begin making their own maps, but some familiarity with R is ideal. I think that in order to produce maps beyond the examples in this guide you should be able to use the following list of functions. The help function in R is very useful, you can find out about a function using ```?```, for example by entering ```?select```. 
+I would like for anyone to be able to begin making their own maps, but some familiarity with R will be required for you to produce maps beyond the examples in this guide. I've listed some of my most-used functions below. Before we get into that I want to point out some of the help tools that are available. 
 
+### Help and cheatsheets
+
+The help function in R provides great documentation and examples for all functions. Use it by running ```?``` followed by a function, for example by entering ```?select```. 
+
+There are very good [cheatsheets for different packages on the RStudio website](https://www.rstudio.com/resources/cheatsheets/). One cheatsheet that you won't find on that page but which I think is really useful for beginners is [the one on data wrangling](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf). 
+
+### Functions that are good to know
 
 - ```<-``` : the assignment operator in R (shortcut Alt -). E.g. ```x <- 5``` gives ```x``` the value 5. 
 - ```$``` : operator to extract one variable in a dataset, e.g. ```my_data$some_column``` returns ```some_column``` from the dataframe ```my_data```.
