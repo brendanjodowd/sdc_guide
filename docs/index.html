@@ -30,6 +30,9 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -58,6 +61,7 @@ if (window.hljs) {
 
 
 
+<link rel="stylesheet" href="style.css" type="text/css" />
 
 
 
@@ -149,6 +153,69 @@ pre code {
 
 
 
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
 
 </head>
 
@@ -158,6 +225,16 @@ pre code {
 <div class="container-fluid main-container">
 
 
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
 
 
 <div id="header">
@@ -165,7 +242,7 @@ pre code {
 
 
 <h1 class="title toc-ignore">Making maps of Ireland in R</h1>
-<h4 class="author">Brendan O’Dowd</h4>
+<h4 class="author"><a href="https://github.com/brendanjodowd">Brendan O’Dowd</a></h4>
 
 </div>
 
@@ -200,7 +277,7 @@ library(sf)</code></pre>
 <h2>Importing maps</h2>
 <p>You <strong>should</strong> be able to import my maps directly from the web, using the following, which will create an object called <code>lea_166</code>.</p>
 <pre class="r"><code>lea_166 &lt;- st_read(&quot;https://raw.githubusercontent.com/brendanjodowd/maps/main/lea_166.geojson&quot;)</code></pre>
-<p>This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total, and a row for each of these, so 167 rows in <code>lea_166</code>. In terms of structure, <code>lea_166</code> is an ‘sf object’, where sf stands for simple features (check by running <code>class(lea_166)</code>). This is a special type of dataframe where one of the columns is called <code>geometry</code> and contains the coordinates for the shapes corresponding to that row.</p>
+<p>This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total, and a row for each of these, so 167 rows in <code>lea_166</code>. In terms of structure, <code>lea_166</code> is an ‘sf object’, where sf stands for simple features. These objects can be manipulated using functions from the sf package and are designed to be compatible with tidyverse functions. An sf object is a special type of dataframe where one of the columns is called <code>geometry</code>, and this contains the coordinates for the shapes corresponding to that row. In our case the geometry column stores multipolygon shapes. There are other types of geometry, including points, lines and multipoints.</p>
 <p>I say <strong>should</strong> in the above because your organisation might not allow R to access the web in this way. If that’s the case then you can navigate to the URL in the <code>st_read()</code> function, and save that page locally as a .geojson file. Then use the file location on your PC as the argument for <code>st_read()</code> instead of the URL.</p>
 <p>We will be able to use this map of 166 LEAs (plus Northern Ireland) to create other maps, such as county outlines and NUTS 3 region outlines.</p>
 <p>There are 11 columns within <code>lea_166</code>, they are:</p>
@@ -290,9 +367,10 @@ ggplot(base_map) +
 </div>
 <div id="adding-more-layers-and-using-theme_void" class="section level2">
 <h2>Adding more layers and using <code>theme_void()</code></h2>
-<p>Let’s take the previous map and add dark outlines for the NUTS 3 regions. I’m going to set <code>fill</code> to <code>NA</code> which means it won’t have any fill colour, then set the line colour to black using <code>colour="black"</code>, and I’ll set the line width to 1 using <code>size=1</code>.</p>
-<p>Note that in ggplot, <code>fill</code> always refers to the colour used to fill in shapes, and <code>colour</code> always refers to line colours. Most of the functions you’ll see which contain the term <code>fill</code> will have an analagous version with <code>colour</code> and vice versa.</p>
-<p>Let’s add another coloured layer, we’ll make all of Dublin blue. The line of code for this will need to go before the NUTS 3 outline, otherwise it will partially obscure that outline.</p>
+<p>Let’s take the previous map and add dark outlines for the NUTS 3 regions. First we need to create the dataframe for the NUTS outlines, which we’ll do in the same way that the county outlines were produced above, using <code>group_by</code> and <code>summarise</code> with <code>st_union</code>.</p>
+<p>I’m going to set the <code>fill</code> for the NUTS 3 outlines to <code>NA</code> which means it won’t have any fill colour, then set the line colour to black using <code>colour="black"</code>. I’ll set the line width to 1 using <code>size=1</code>.</p>
+<p>Note that in ggplot, <code>fill</code> always refers to the colour used to fill in shapes, and <code>colour</code> always refers to line colours. Most of the functions you’ll see which refer to <code>fill</code> will have an analagous version with <code>colour</code> and vice versa.</p>
+<p>Let’s add another coloured layer, we’ll make all of Dublin blue. I’ll put the line of code for this before the code for the NUTS 3 outline, that way the blue fill won’t partially obscure that outline.</p>
 <p>I’m also going to add <code>theme_void()</code> here. With ggplot there are lots of different themes you can add to change the appearance of your plot, but for maps the only one I really use is <code>theme_void()</code>. It’s effect is to remove the axes and give you a clear background.</p>
 <pre class="r"><code>nuts_outline &lt;- lea_166 %&gt;% 
   group_by(NUTS3) %&gt;% 
@@ -334,7 +412,14 @@ ggsave(file = &quot;images/simple_lea_map.png&quot; , plot = simple_lea_map, wid
   geom_sf(aes(fill=Pop2016))</code></pre>
 <p><img src="index_files/figure-html/chloro_1%20-1.png" width="672" /></p>
 <p>Note the <code>aes()</code> function within <code>geom_sf()</code>. This is for aesthetic mappings, and is very commonly used within ggplot for specifying dimensions. Find out more about this function <a href="https://www.rdocumentation.org/packages/ggplot2/versions/3.3.5/topics/aes">here</a>.</p>
-<p>You’ll see that the colour varies from dark blue to light blue. There are a few easy ways to choose a different range of colours, and I’ll show two of these here. The first is using <code>scale_fill_distiller</code> which takes an argument <code>palette</code>. Here I’m using the palette <code>YlOrRd</code> which is short for yellow-orange-red. There are 35 different palettes supplied with this function which you can see on the help page for <code>scale_fill_distiller</code>. There are three type of palette: sequential, which are all light to dark and are designed for data that goes from low to high; qualitative, which are a mix of contrasting colours used for categorical data; and diverging, which have a dark colour at each end and a very light colour in the middle, and these are best suited where the midpoint in the range requires some emphasis.</p>
+You’ll see that the colour in the plot above varies from dark blue to light blue. There are a few easy ways to choose a different range of colours, and I’ll show two of these here. The first is using <code>scale_fill_distiller</code> which takes an argument <code>palette</code>. Here I’m using the palette <code>YlOrRd</code> which is short for yellow-orange-red.
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div id="an-aside-on-palettes" class="section level4 blue">
+<h4>An aside on palettes</h4>
+<p>There are 35 different palettes supplied with <code>scale_fill_distiller</code>. You can check out the list of these on the help page for the function (run <code>?scale_fill_distiller</code>). There are three type of palette: <strong>sequential</strong>, which are all light to dark and are designed for data that goes from low to high; <strong>qualitative</strong>, which are a mix of contrasting colours used for categorical data; and <strong>diverging</strong>, which have a dark colour at each end and a very light colour in the middle, and these are best suited where the midpoint in the range requires some emphasis.</p>
+</div>
 <p>There is another argument to <code>scale_fill_distiller</code> that is worth knowing which is <code>direction</code>, and this can be used to flip the palette, e.g. from dark to light instead of light to dark. By default it is equal to <code>-1</code>, so set it to <code>1</code> to reverse.</p>
 <pre class="r"><code>ggplot(lea_166) + 
   geom_sf(aes(fill=Pop2016)) +
@@ -413,27 +498,29 @@ ggplot(dublin_map) + geom_sf()</code></pre>
 
 ggplot(map_with_density) + geom_sf(aes(fill=pop_density))</code></pre>
 <p><img src="index_files/figure-html/pop_dens_1%20-1.png" width="672" /></p>
-<p>As we can see this is pretty unsatisfactory, too much of the detail is squashed into the top of the scale. It would make more sense to divide LEAs into bands with roughly equal numbers in each. There are tools for dividing a continuous scale into quintiles, but I prefer to specify the bands myself so that the breaks are nice rounded figures.</p>
-<p>We can make a new variables called <code>density_band</code> from <code>pop_density</code> using the <code>cut</code> function. See how the first value is the variable to make intervals from, then it has arguments <code>breaks</code> and <code>labels</code> each of which takes a vector. Note that the vector for <code>breaks</code> must be one element longer than that for <code>labels</code>.</p>
-<p>The important thing about the <code>cut</code> function is that the value it creates is a <strong>factor</strong>. Factors are used to represent categorical data and they can have an underlying order applied to them. When we plot a factor using <code>ggplot</code> it will take that order into account when applying the palette and creating the legend. In this case the order is determined by our vectors <code>break</code> and <code>labels</code>.</p>
+<p>As we can see this is pretty unsatisfactory, too much of the detail is squashed into the top of the scale. It would make more sense to divide LEAs into bands with roughly equal numbers in each. There are tools for dividing a continuous scale into equally sized groups like quintiles, but I prefer to specify the bands myself so that the breaks are nice rounded figures.</p>
+<p>We can make a new variable called <code>density_band</code> from <code>pop_density</code> using the <code>cut</code> function. See how the first value is the variable to make intervals from, then it has arguments <code>breaks</code> and <code>labels</code> each of which takes a vector. Note that the vector for <code>breaks</code> must be one element longer than that for <code>labels</code>.</p>
 <pre class="r"><code>map_with_density &lt;- lea_166 %&gt;% 
   mutate(pop_density = Pop2016/AREA) %&gt;% 
   mutate(density_band = cut(pop_density , 
                                          breaks = c(0,10,50,100,500,1000,10000),
                                          labels = c(&quot;0-9&quot;, &quot;10-49&quot;, &quot;50-99&quot;, &quot;100-499&quot;,&quot;500-999&quot;, &quot;1000+&quot;)))</code></pre>
-<p>The structure of a factor is a little bit complicated. Very briefly, the labels that we make are a character attribute associated with the variable, and the underlying data is stored as a series of numbers. The following three lines of code might illustrate this better. The first line prints the first five entries of <code>density_band</code>, but it also shows the six labels associated with <code>density_band</code>. The second line of code uses <code>as.integer</code> to extract the internal codes for those first ten entries. Note that 1 corresponds to <code>"0-9"</code>, 2 corresponds to <code>"10-49"</code>, etc. Finally, the last line here uses the function <code>levels</code> to return the levels of the factor.</p>
-<pre class="r"><code>map_with_density$density_band[1:10]
-
-map_with_density$density_band[1:10] %&gt;% as.integer()
-
-levels(map_with_density$density_band)</code></pre>
+<p>The important thing about the <code>cut</code> function is that the value it creates is a <strong>factor</strong>. Factors are used to represent categorical data and they can have an underlying order applied to them. When we plot a factor using <code>ggplot</code> it will take that order into account when applying the palette and creating the legend. In this case the order is determined by our vectors <code>break</code> and <code>labels</code>.</p>
+<p>The structure of a factor is a little bit complicated. Very briefly, the labels that we make are a character attribute associated with the variable, and the underlying data is stored as a series of integers The following three lines of code might illustrate this better. The first line prints the first five entries of <code>density_band</code>, but it also shows the six labels associated with <code>density_band</code>. The second line of code uses <code>as.integer</code> to extract the internal codes for those first ten entries. Note that 1 corresponds to <code>"0-9"</code>, 2 corresponds to <code>"10-49"</code>, etc. Finally, the last line here uses the function <code>levels</code> to return the levels of the factor.</p>
+<pre class="r"><code>map_with_density$density_band[1:10]</code></pre>
+<pre><code>##  [1] 100-499 10-49   50-99   10-49   10-49   10-49   1000+   10-49   1000+   10-49  
+## Levels: 0-9 10-49 50-99 100-499 500-999 1000+</code></pre>
+<pre class="r"><code>map_with_density$density_band[1:10] %&gt;% as.integer()</code></pre>
+<pre><code>##  [1] 4 2 3 2 2 2 6 2 6 2</code></pre>
+<pre class="r"><code>levels(map_with_density$density_band)</code></pre>
+<pre><code>## [1] &quot;0-9&quot;     &quot;10-49&quot;   &quot;50-99&quot;   &quot;100-499&quot; &quot;500-999&quot; &quot;1000+&quot;</code></pre>
 <p>Anyway, let’s plot <code>density_band</code>.</p>
 <pre class="r"><code>ggplot(map_with_density) + 
   geom_sf(aes(fill=density_band)) + 
   scale_fill_brewer(palette=&quot;YlOrBr&quot;) +
   theme_void()</code></pre>
 <p><img src="index_files/figure-html/density_band_plot%20-1.png" width="672" /></p>
-<p>I’m just going to add one or two more bits to spruce up this plot. I would like the NA colour (for Northern Ireland) to be a more distinctive colour so it’s not confused with the <code>"0-19"</code> band. This is done using the <code>na.value</code> argument. However I’d also like to remove the NA from the legend. I’ll do that by specifying <code>limits</code> in the <code>scale_fill_brewer</code> function. The <code>limits</code> function puts limits on what the scale will cover, anything outside of those limits will not appear in the legend. I’ll set the limits to be equal to the levels of the variable <code>density_band</code>, that way the NA will disappear from the legend. Finally, I’m going to use <code>name =</code> in the <code>scale_fill_brewer</code> function to make a nice title for the legend. This time however, I’m using the function <code>expression</code> within the <code>name =</code> argument because I want to insert a squared symbol for km<sup>2</sup>.</p>
+<p>I’m just going to add one or two more bits to spruce up this plot. I would like the NA colour (for Northern Ireland) to be a more distinctive colour so it’s not confused with the <code>"0-19"</code> band. This is done using the <code>na.value</code> argument within <code>scale_fill_brewer</code>. However I’d also like to remove the NA from the legend. I’ll do that by specifying <code>limits</code> in the <code>scale_fill_brewer</code> function. The <code>limits</code> argument puts limits on what the scale will cover, anything outside of those limits will not appear in the legend. I’ll set the limits to be equal to the levels of the variable <code>density_band</code>, that way the NA will disappear from the legend. Finally, I’m going to use <code>name =</code> in the <code>scale_fill_brewer</code> function to make a nice title for the legend. This time however, I’m using the function <code>expression</code> within the <code>name</code> argument because I want to insert a squared symbol for km<sup>2</sup>.</p>
 <pre class="r"><code>ggplot(map_with_density) + 
   geom_sf(aes(fill=density_band)) + 
   scale_fill_brewer(palette=&quot;YlOrBr&quot;, 
@@ -492,6 +579,8 @@ ggdraw(main_map) +
 
 
 
+</div>
+</div>
 
 </div>
 
@@ -524,6 +613,35 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

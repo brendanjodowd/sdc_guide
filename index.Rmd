@@ -1,8 +1,14 @@
 ---
 title: "Making maps of Ireland in R"
-author: "Brendan O'Dowd"
-output: html_document
+author: "[Brendan O'Dowd](https://github.com/brendanjodowd)"
+output: 
+  html_document:
+    css: style.css
+    toc: true
+    toc_float: true
+    toc_collapsed: true
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -51,10 +57,9 @@ lea_166 <- st_read("https://raw.githubusercontent.com/brendanjodowd/maps/main/le
 
 ```
 
-This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total, and a row for each of these, so 167 rows in ```lea_166```. In terms of structure, ```lea_166``` is an 'sf object', where sf stands for simple features (check by running ```class(lea_166)```). This is a special type of dataframe where one of the columns is called ```geometry``` and contains the coordinates for the shapes corresponding to that row.  
+This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total, and a row for each of these, so 167 rows in ```lea_166```. In terms of structure, ```lea_166``` is an 'sf object', where sf stands for simple features. These objects can be manipulated using functions from the sf package and are designed to be compatible with tidyverse functions. An sf object is a special type of dataframe where one of the columns is called ```geometry```, and this contains the coordinates for the shapes corresponding to that row. In our case the geometry column stores multipolygon shapes. There are other types of geometry, including points, lines and multipoints. 
 
 I say **should** in the above because your organisation might not allow R to access the web in this way. If that's the case then you can navigate to the URL in the ```st_read()``` function, and save that page locally as a .geojson file. Then use the file location on your PC as the argument for ```st_read()``` instead of the URL.
-
 
 We will be able to use this map of 166 LEAs (plus Northern Ireland) to create other maps, such as county outlines and NUTS 3 region outlines.
 
@@ -174,11 +179,13 @@ ggplot(lea_166) +
 
 ## Adding more layers and using ```theme_void()```
 
-Let's take the previous map and add dark outlines for the NUTS 3 regions. I'm going to set ```fill``` to ```NA``` which means it won't have any fill colour, then set the line colour to black using ```colour="black"```, and I'll set the line width to 1 using ```size=1```. 
+Let's take the previous map and add dark outlines for the NUTS 3 regions. First we need to create the dataframe for the NUTS outlines, which we'll do in the same way that the county outlines were produced above, using ```group_by``` and ```summarise``` with ```st_union```. 
 
-Note that in ggplot, ```fill``` always refers to the colour used to fill in shapes, and ```colour``` always refers to line colours. Most of the functions you'll see which contain the term ```fill``` will have an analagous version with ```colour``` and vice versa.  
+I'm going to set the ```fill``` for the NUTS 3 outlines to ```NA``` which means it won't have any fill colour, then set the line colour to black using ```colour="black"```. I'll set the line width to 1 using ```size=1```. 
 
-Let's add another coloured layer, we'll make all of Dublin blue. The line of code for this will need to go before the NUTS 3 outline, otherwise it will partially obscure that outline. 
+Note that in ggplot, ```fill``` always refers to the colour used to fill in shapes, and ```colour``` always refers to line colours. Most of the functions you'll see which refer to ```fill``` will have an analagous version with ```colour``` and vice versa.  
+
+Let's add another coloured layer, we'll make all of Dublin blue. I'll put the line of code for this before the code for the NUTS 3 outline, that way the blue fill won't partially obscure that outline. 
 
 I'm also going to add ```theme_void()``` here. With ggplot there are lots of different themes you can add to change the appearance of your plot, but for maps the only one I really use is ```theme_void()```. It's effect is to remove the axes and give you a clear background.
 
@@ -241,7 +248,17 @@ ggplot(lea_166) +
 
 Note the ```aes()``` function within ```geom_sf()```. This is for aesthetic mappings, and is very commonly used within ggplot for specifying dimensions. Find out more about this function [here](https://www.rdocumentation.org/packages/ggplot2/versions/3.3.5/topics/aes). 
 
-You'll see that the colour varies from dark blue to light blue. There are a few easy ways to choose a different range of colours, and I'll show two of these here. The first is using ```scale_fill_distiller``` which takes an argument ```palette```. Here I'm using the palette ```YlOrRd``` which is short for yellow-orange-red. There are 35 different palettes supplied with this function which you can see on the help page for ```scale_fill_distiller```. There are three type of palette: sequential, which are all light to dark and are designed for data that goes from low to high; qualitative, which are a mix of contrasting colours used for categorical data; and diverging, which have a dark colour at each end and a very light colour in the middle, and these are best suited where the midpoint in the range requires some emphasis.
+
+You'll see that the colour in the plot above varies from dark blue to light blue. There are a few easy ways to choose a different range of colours, and I'll show two of these here. The first is using ```scale_fill_distiller``` which takes an argument ```palette```. Here I'm using the palette ```YlOrRd``` which is short for yellow-orange-red. 
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+#### An aside on palettes
+There are 35 different palettes supplied with ```scale_fill_distiller```. You can check out the list of these on the help page for the function (run ```?scale_fill_distiller```). There are three type of palette: **sequential**, which are all light to dark and are designed for data that goes from low to high; **qualitative**, which are a mix of contrasting colours used for categorical data; and **diverging**, which have a dark colour at each end and a very light colour in the middle, and these are best suited where the midpoint in the range requires some emphasis.
+
+</div>
+
 
 There is another argument to ```scale_fill_distiller``` that is worth knowing which is ```direction```, and this can be used to flip the palette, e.g. from dark to light instead of light to dark. By default it is equal to ```-1```, so set it to ```1``` to reverse. 
 
@@ -349,11 +366,9 @@ map_with_density <- lea_166 %>%
 ggplot(map_with_density) + geom_sf(aes(fill=pop_density))
 ```
 
-As we can see this is pretty unsatisfactory, too much of the detail is squashed into the top of the scale. It would make more sense to divide LEAs into bands with roughly equal numbers in each. There are tools for dividing a continuous scale into quintiles, but I prefer to specify the bands myself so that the breaks are nice rounded figures. 
+As we can see this is pretty unsatisfactory, too much of the detail is squashed into the top of the scale. It would make more sense to divide LEAs into bands with roughly equal numbers in each. There are tools for dividing a continuous scale into equally sized groups like quintiles, but I prefer to specify the bands myself so that the breaks are nice rounded figures. 
 
-We can make a new variables called ```density_band``` from ```pop_density``` using the ```cut``` function. See how the first value is the variable to make intervals from, then it has arguments ```breaks``` and ```labels``` each of which takes a vector. Note that the vector for ```breaks``` must be one element longer than that for ```labels```.
-
-The important thing about the ```cut``` function is that the value it creates is a **factor**. Factors are used to represent categorical data and they can have an underlying order applied to them. When we plot a factor using ```ggplot``` it will take that order into account when applying the palette and creating the legend. In this case the order is determined by our vectors ```break``` and ```labels```. 
+We can make a new variable called ```density_band``` from ```pop_density``` using the ```cut``` function. See how the first value is the variable to make intervals from, then it has arguments ```breaks``` and ```labels``` each of which takes a vector. Note that the vector for ```breaks``` must be one element longer than that for ```labels```.
 
 
 ```{r cut_function , message=FALSE , results="hide"}
@@ -364,9 +379,11 @@ map_with_density <- lea_166 %>%
                                          labels = c("0-9", "10-49", "50-99", "100-499","500-999", "1000+")))
 ```
 
-The structure of a factor is a little bit complicated. Very briefly, the labels that we make are a character attribute associated with the variable, and the underlying data is stored as a series of numbers. The following three lines of code might illustrate this better. The first line prints the first five entries of ```density_band```, but it also shows the six labels associated with ```density_band```. The second line of code uses ```as.integer``` to extract the internal codes for those first ten entries. Note that 1 corresponds to ```"0-9"```, 2 corresponds to ```"10-49"```, etc. Finally, the last line here uses the function ```levels``` to return the levels of the factor. 
+The important thing about the ```cut``` function is that the value it creates is a **factor**. Factors are used to represent categorical data and they can have an underlying order applied to them. When we plot a factor using ```ggplot``` it will take that order into account when applying the palette and creating the legend. In this case the order is determined by our vectors ```break``` and ```labels```.
 
-```{r glimpse_density, message=FALSE , results="hide"}
+The structure of a factor is a little bit complicated. Very briefly, the labels that we make are a character attribute associated with the variable, and the underlying data is stored as a series of integers The following three lines of code might illustrate this better. The first line prints the first five entries of ```density_band```, but it also shows the six labels associated with ```density_band```. The second line of code uses ```as.integer``` to extract the internal codes for those first ten entries. Note that 1 corresponds to ```"0-9"```, 2 corresponds to ```"10-49"```, etc. Finally, the last line here uses the function ```levels``` to return the levels of the factor. 
+
+```{r glimpse_density}
 map_with_density$density_band[1:10]
 
 map_with_density$density_band[1:10] %>% as.integer()
@@ -383,7 +400,7 @@ ggplot(map_with_density) +
   theme_void()
 ```
 
-I'm just going to add one or two more bits to spruce up this plot. I would like the NA colour (for Northern Ireland) to be a more distinctive colour so it's not confused with the ```"0-19"``` band. This is done using the ```na.value``` argument. However I'd also like to remove the NA from the legend. I'll do that by specifying ```limits``` in the ```scale_fill_brewer``` function. The ```limits``` function puts limits on what the scale will cover, anything outside of those limits will not appear in the legend. I'll set the limits to be equal to the levels of the variable ```density_band```, that way the NA will disappear from the legend. Finally, I'm going to use ```name = ``` in the ```scale_fill_brewer``` function to make a nice title for the legend. This time however, I'm using the function ```expression``` within the ```name = ``` argument because I want to insert a squared symbol for km^2^. 
+I'm just going to add one or two more bits to spruce up this plot. I would like the NA colour (for Northern Ireland) to be a more distinctive colour so it's not confused with the ```"0-19"``` band. This is done using the ```na.value``` argument within ```scale_fill_brewer```. However I'd also like to remove the NA from the legend. I'll do that by specifying ```limits``` in the ```scale_fill_brewer``` function. The ```limits``` argument puts limits on what the scale will cover, anything outside of those limits will not appear in the legend. I'll set the limits to be equal to the levels of the variable ```density_band```, that way the NA will disappear from the legend. Finally, I'm going to use ```name = ``` in the ```scale_fill_brewer``` function to make a nice title for the legend. This time however, I'm using the function ```expression``` within the ```name``` argument because I want to insert a squared symbol for km^2^. 
 
 ```{r density_band_plot_2 , message=FALSE , results="hide"}
 ggplot(map_with_density) + 

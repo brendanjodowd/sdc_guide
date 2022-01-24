@@ -1,0 +1,15 @@
+.tocify {
+  border: none;
+  color: grey;
+  border-radius: 0px;
+}
+
+
+.tocify-subheader > .tocify-item {
+  text-indent: initial;
+  padding-left: 2em;
+}
+
+.tocify-header {
+  text-indent: initial;
+}
