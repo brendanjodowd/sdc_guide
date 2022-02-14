@@ -1,6 +1,6 @@
 ---
 title: "Making maps of Ireland in R"
-author: "[Brendan O'Dowd](https://github.com/brendanjodowd)"
+author: "[Home](https://brendanjodowd.github.io)"
 output: 
   html_document:
     css: style.css
@@ -122,7 +122,7 @@ You could put ```base_map``` into the first ```geom_sf``` function with a ```dat
  
 
 
-## Aggregating up for counties and NUTS regions
+## Maps of counties and NUTS regions
 
 Maps for counties, admin areas, NUTS2 and NUTS3 regions can be produced using ```lea_166```. To produce a map of counties, for example, use the code below. The key function here is ```st_union()``` which can be used to join sf objects. 
 
@@ -188,6 +188,12 @@ ggplot(lea_166) +
 
 Let's take the previous map and add dark outlines for the NUTS 3 regions. First we need to create the dataframe for the NUTS outlines, which we'll do in the same way that the county outlines were produced above, using ```group_by``` and ```summarise``` with ```st_union```. 
 
+```{r nuts_outline_1 , message=FALSE , results="hide"}
+nuts_outline <- lea_166 %>% 
+  group_by(NUTS3) %>% 
+  summarise(geometry = st_union(geometry))
+```
+
 I'm going to set the ```fill``` for the NUTS 3 outlines to ```NA``` which means it won't have any fill colour, then set the line colour to black using ```colour="black"```. I'll set the line width to 1 using ```size=1```. 
 
 Note that in ggplot, ```fill``` always refers to the colour used to fill in shapes, and ```colour``` always refers to line colours. Most of the functions you'll see which refer to ```fill``` will have an analagous version with ```colour``` and vice versa.  
@@ -196,7 +202,7 @@ Let's add another coloured layer, we'll make all of Dublin blue. I'll put the li
 
 I'm also going to add ```theme_void()``` here. With ggplot there are lots of different themes you can add to change the appearance of your plot, but for maps the only one I really use is ```theme_void()```. It's effect is to remove the axes and give you a clear background.
 
-```{r nuts_outline , message=FALSE , results="hide"}
+```{r nuts_outline_2 , message=FALSE , results="hide"}
 nuts_outline <- lea_166 %>% 
   group_by(NUTS3) %>% 
   summarise(geometry = st_union(geometry))
@@ -298,7 +304,7 @@ ggplot(lea_166) +
 
 ```
 
-## Hatching and cross hatching regions in a map
+## Hatching and cross hatching selected areas
 
 Unfortunately there is no built-in means of hatching an area using ggplot, but I found a useful work-around on Stack Overflow [here](https://stackoverflow.com/a/59301874/15703221). The code to generate a pattern is shown below. The function ```hatch_pattern``` takes three arguments: shape, which is the region (sf object) that you want to show with a hatch; scale, which is a number used to adjust the spacing of the hatch; and pattern which has four options for the direction of the lines in the hatch.
 
@@ -339,7 +345,7 @@ If you are being finnicky you might like to add ```lea_166``` again in another `
 
 You can make a crosshatch by creating a second hatch with pattern "right2left" and overlaying this with another ```geom_sf``` function. 
 
-## Zooming in on an area
+## Cropping/zooming in 
 
 We need to distinguish between two types of zooming in here. One kind of zoom is where we plot just one subset of the map, and the other is where the whole map "exists" but we are cropping out a specific piece. 
 
@@ -362,7 +368,7 @@ ggplot(lea_166) +
 ```
 
 
-## Sequential colours for ordinal variables
+## Creating ordinal variable from continuous variable
 
 Suppose we want to plot a map with an ordinal variable, which is like a category but has some ordering from low to high. We might make an ordinal variable from a continuous variable by assigning values into bands. A good example here would be population density. Let's make a new column for population density and try to plot it. 
 
@@ -376,7 +382,6 @@ ggplot(map_with_density) + geom_sf(aes(fill=pop_density))
 As we can see this is pretty unsatisfactory, too much of the detail is squashed into the top of the scale. It would make more sense to divide LEAs into bands with roughly equal numbers in each. There are tools for dividing a continuous scale into equally sized groups like quintiles, but I prefer to specify the bands myself so that the breaks are nice rounded figures. 
 
 We can make a new variable called ```density_band``` from ```pop_density``` using the ```cut``` function. See how the first value is the variable to make intervals from, then it has arguments ```breaks``` and ```labels``` each of which takes a vector. Note that the vector for ```breaks``` must be one element longer than that for ```labels```.
-
 
 ```{r cut_function , message=FALSE , results="hide"}
 map_with_density <- lea_166 %>% 
@@ -398,7 +403,9 @@ map_with_density$density_band[1:10] %>% as.integer()
 levels(map_with_density$density_band)
 ```
 
-Anyway, let's plot ```density_band```. 
+## Plotting an ordinal variable
+
+With our ordinal variable ```density_band``` created (see above), let's plot it. 
 
 ```{r density_band_plot , message=FALSE , results="hide"}
 ggplot(map_with_density) + 

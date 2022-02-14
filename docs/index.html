@@ -9,7 +9,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Brendan O’Dowd" />
+<meta name="author" content="Home" />
 
 
 <title>Making maps of Ireland in R</title>
@@ -242,7 +242,7 @@ div.tocify {
 
 
 <h1 class="title toc-ignore">Making maps of Ireland in R</h1>
-<h4 class="author"><a href="https://github.com/brendanjodowd">Brendan O’Dowd</a></h4>
+<h4 class="author"><a href="https://brendanjodowd.github.io">Home</a></h4>
 
 </div>
 
@@ -305,17 +305,17 @@ library(sf)</code></pre>
 <pre class="r"><code>glimpse(lea_166)</code></pre>
 <pre><code>## Rows: 167
 ## Columns: 11
-## $ LE_ID      &lt;chr&gt; &quot;13160403&quot;, &quot;13210401&quot;, &quot;13180401&quot;, &quot;1360401&quot;, &quot;13100400&quot;, &quot;13230402~
-## $ LEA        &lt;chr&gt; &quot;Ratoath&quot;, &quot;Roscrea-Templemore&quot;, &quot;Tullamore&quot;, &quot;Tuam&quot;, &quot;Borris-in-Oss~
-## $ COUNTY     &lt;chr&gt; &quot;Meath&quot;, &quot;Tipperary&quot;, &quot;Offaly&quot;, &quot;Galway&quot;, &quot;Laois&quot;, &quot;Westmeath&quot;, &quot;Dub~
-## $ AREA       &lt;dbl&gt; 294.98056, 492.84520, 399.42957, 780.69255, 907.57781, 713.83629, 9.~
-## $ GUID       &lt;chr&gt; &quot;2ae19629-3f1b-13a3-e055-000000000001&quot;, &quot;2ae19629-3f2d-13a3-e055-000~
-## $ NUTS3      &lt;chr&gt; &quot;Mid-East&quot;, &quot;Mid-West&quot;, &quot;Midlands&quot;, &quot;West&quot;, &quot;Midlands&quot;, &quot;Midlands&quot;, ~
-## $ NUTS2      &lt;chr&gt; &quot;Eastern and Midland&quot;, &quot;Southern&quot;, &quot;Eastern and Midland&quot;, &quot;Northern ~
-## $ ADMIN_AREA &lt;chr&gt; &quot;MEATH&quot;, &quot;TIPPERARY&quot;, &quot;OFFALY&quot;, &quot;GALWAY COUNTY&quot;, &quot;LAOIS&quot;, &quot;WESTMEATH~
-## $ cso_name   &lt;chr&gt; &quot;Ratoath, Meath&quot;, &quot;Roscrea-Templemore, Tipperary&quot;, &quot;Tullamore, Offal~
-## $ Pop2016    &lt;dbl&gt; 33318, 16594, 29159, 33191, 24807, 21674, 41593, 13771, 26595, 17255~
-## $ geometry   &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-6.662222 5..., MULTIPOLYGON (((-8.0549~</code></pre>
+## $ LE_ID      &lt;chr&gt; &quot;13160403&quot;, &quot;13210401&quot;, &quot;13180401&quot;, &quot;1360401&quot;, &quot;13100400&quot;, ~
+## $ LEA        &lt;chr&gt; &quot;Ratoath&quot;, &quot;Roscrea-Templemore&quot;, &quot;Tullamore&quot;, &quot;Tuam&quot;, &quot;Borr~
+## $ COUNTY     &lt;chr&gt; &quot;Meath&quot;, &quot;Tipperary&quot;, &quot;Offaly&quot;, &quot;Galway&quot;, &quot;Laois&quot;, &quot;Westmea~
+## $ AREA       &lt;dbl&gt; 294.98056, 492.84520, 399.42957, 780.69255, 907.57781, 713.~
+## $ GUID       &lt;chr&gt; &quot;2ae19629-3f1b-13a3-e055-000000000001&quot;, &quot;2ae19629-3f2d-13a3~
+## $ NUTS3      &lt;chr&gt; &quot;Mid-East&quot;, &quot;Mid-West&quot;, &quot;Midlands&quot;, &quot;West&quot;, &quot;Midlands&quot;, &quot;Mi~
+## $ NUTS2      &lt;chr&gt; &quot;Eastern and Midland&quot;, &quot;Southern&quot;, &quot;Eastern and Midland&quot;, &quot;~
+## $ ADMIN_AREA &lt;chr&gt; &quot;MEATH&quot;, &quot;TIPPERARY&quot;, &quot;OFFALY&quot;, &quot;GALWAY COUNTY&quot;, &quot;LAOIS&quot;, &quot;~
+## $ cso_name   &lt;chr&gt; &quot;Ratoath, Meath&quot;, &quot;Roscrea-Templemore, Tipperary&quot;, &quot;Tullamo~
+## $ Pop2016    &lt;dbl&gt; 33318, 16594, 29159, 33191, 24807, 21674, 41593, 13771, 265~
+## $ geometry   &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-6.662222 5..., MULTIPOLYGON (~</code></pre>
 </div>
 <div id="first-plot" class="section level2">
 <h2>First plot</h2>
@@ -336,8 +336,8 @@ ggplot(base_map) +
 <!-- ``` -->
 <!-- Even though this layout is probably more commonly used, I will be using the previous layout because later on I'll be using multiple ```geom_sf()``` functions to build up a plot in layers, and I find that the dataframe being used is less ambiguous that way.  -->
 </div>
-<div id="aggregating-up-for-counties-and-nuts-regions" class="section level2">
-<h2>Aggregating up for counties and NUTS regions</h2>
+<div id="maps-of-counties-and-nuts-regions" class="section level2">
+<h2>Maps of counties and NUTS regions</h2>
 <p>Maps for counties, admin areas, NUTS2 and NUTS3 regions can be produced using <code>lea_166</code>. To produce a map of counties, for example, use the code below. The key function here is <code>st_union()</code> which can be used to join sf objects.</p>
 <pre class="r"><code>county_map &lt;- lea_166 %&gt;% 
   group_by(COUNTY) %&gt;% 
@@ -376,6 +376,9 @@ ggplot(base_map) +
 <div id="adding-more-layers-and-using-theme_void" class="section level2">
 <h2>Adding more layers and using <code>theme_void()</code></h2>
 <p>Let’s take the previous map and add dark outlines for the NUTS 3 regions. First we need to create the dataframe for the NUTS outlines, which we’ll do in the same way that the county outlines were produced above, using <code>group_by</code> and <code>summarise</code> with <code>st_union</code>.</p>
+<pre class="r"><code>nuts_outline &lt;- lea_166 %&gt;% 
+  group_by(NUTS3) %&gt;% 
+  summarise(geometry = st_union(geometry))</code></pre>
 <p>I’m going to set the <code>fill</code> for the NUTS 3 outlines to <code>NA</code> which means it won’t have any fill colour, then set the line colour to black using <code>colour="black"</code>. I’ll set the line width to 1 using <code>size=1</code>.</p>
 <p>Note that in ggplot, <code>fill</code> always refers to the colour used to fill in shapes, and <code>colour</code> always refers to line colours. Most of the functions you’ll see which refer to <code>fill</code> will have an analagous version with <code>colour</code> and vice versa.</p>
 <p>Let’s add another coloured layer, we’ll make all of Dublin blue. I’ll put the line of code for this before the code for the NUTS 3 outline, that way the blue fill won’t partially obscure that outline.</p>
@@ -390,7 +393,7 @@ ggplot(lea_166) +
   geom_sf(data = lea_166 %&gt;% filter(COUNTY==&quot;Dublin&quot;) , fill=&quot;blue&quot;) +
   geom_sf(data = nuts_outline , fill= NA , colour=&quot;black&quot;, size=1) +
   theme_void()</code></pre>
-<p><img src="index_files/figure-html/nuts_outline%20-1.png" width="672" /></p>
+<p><img src="index_files/figure-html/nuts_outline_2%20-1.png" width="672" /></p>
 </div>
 <div id="creating-named-objects-from-plots" class="section level2">
 <h2>Creating named objects from plots</h2>
@@ -450,8 +453,8 @@ ggplot(lea_166) +
   scale_fill_distiller(palette = &quot;YlOrRd&quot; , label = comma, name=&quot;Population&quot;)</code></pre>
 <p><img src="index_files/figure-html/title_format%20-1.png" width="672" /></p>
 </div>
-<div id="hatching-and-cross-hatching-regions-in-a-map" class="section level2">
-<h2>Hatching and cross hatching regions in a map</h2>
+<div id="hatching-and-cross-hatching-selected-areas" class="section level2">
+<h2>Hatching and cross hatching selected areas</h2>
 <p>Unfortunately there is no built-in means of hatching an area using ggplot, but I found a useful work-around on Stack Overflow <a href="https://stackoverflow.com/a/59301874/15703221">here</a>. The code to generate a pattern is shown below. The function <code>hatch_pattern</code> takes three arguments: shape, which is the region (sf object) that you want to show with a hatch; scale, which is a number used to adjust the spacing of the hatch; and pattern which has four options for the direction of the lines in the hatch.</p>
 <pre class="r"><code>hatch_pattern &lt;- function(shape, scale, pattern) {
   ex = list(
@@ -483,8 +486,8 @@ ggplot(lea_166) +
 <p>If you are being finnicky you might like to add <code>lea_166</code> again in another <code>geom_sf</code> layer, this time with <code>fill = NA</code>, so that the LEA boundaries lie on top of the hatch, and not the other way around.</p>
 <p>You can make a crosshatch by creating a second hatch with pattern “right2left” and overlaying this with another <code>geom_sf</code> function.</p>
 </div>
-<div id="zooming-in-on-an-area" class="section level2">
-<h2>Zooming in on an area</h2>
+<div id="croppingzooming-in" class="section level2">
+<h2>Cropping/zooming in</h2>
 <p>We need to distinguish between two types of zooming in here. One kind of zoom is where we plot just one subset of the map, and the other is where the whole map “exists” but we are cropping out a specific piece.</p>
 <p>Let do the first kind of zoom where we plot just the LEAs in County Dublin.</p>
 <pre class="r"><code>dublin_map &lt;- lea_166 %&gt;% filter(COUNTY==&quot;Dublin&quot;)
@@ -498,8 +501,8 @@ ggplot(dublin_map) + geom_sf()</code></pre>
   coord_sf(xlim = c(-6.65,-5.95) , ylim = c(53.18, 53.65))</code></pre>
 <p><img src="index_files/figure-html/dublin_crop%20-1.png" width="672" /></p>
 </div>
-<div id="sequential-colours-for-ordinal-variables" class="section level2">
-<h2>Sequential colours for ordinal variables</h2>
+<div id="creating-ordinal-variable-from-continuous-variable" class="section level2">
+<h2>Creating ordinal variable from continuous variable</h2>
 <p>Suppose we want to plot a map with an ordinal variable, which is like a category but has some ordering from low to high. We might make an ordinal variable from a continuous variable by assigning values into bands. A good example here would be population density. Let’s make a new column for population density and try to plot it.</p>
 <pre class="r"><code>map_with_density &lt;- lea_166 %&gt;% 
   mutate(pop_density = Pop2016/AREA)
@@ -516,13 +519,17 @@ ggplot(map_with_density) + geom_sf(aes(fill=pop_density))</code></pre>
 <p>The important thing about the <code>cut</code> function is that the value it creates is a <strong>factor</strong>. Factors are used to represent categorical data and they can have an underlying order applied to them. When we plot a factor using <code>ggplot</code> it will take that order into account when applying the palette and creating the legend. In this case the order is determined by our vectors <code>break</code> and <code>labels</code>.</p>
 <p>The structure of a factor is a little bit complicated. Very briefly, the labels that we make are a character attribute associated with the variable, and the underlying data is stored as a series of integers The following three lines of code might illustrate this better. The first line prints the first five entries of <code>density_band</code>, but it also shows the six labels associated with <code>density_band</code>. The second line of code uses <code>as.integer</code> to extract the internal codes for those first ten entries. Note that 1 corresponds to <code>"0-9"</code>, 2 corresponds to <code>"10-49"</code>, etc. Finally, the last line here uses the function <code>levels</code> to return the levels of the factor.</p>
 <pre class="r"><code>map_with_density$density_band[1:10]</code></pre>
-<pre><code>##  [1] 100-499 10-49   50-99   10-49   10-49   10-49   1000+   10-49   1000+   10-49  
+<pre><code>##  [1] 100-499 10-49   50-99   10-49   10-49   10-49   1000+   10-49   1000+  
+## [10] 10-49  
 ## Levels: 0-9 10-49 50-99 100-499 500-999 1000+</code></pre>
 <pre class="r"><code>map_with_density$density_band[1:10] %&gt;% as.integer()</code></pre>
 <pre><code>##  [1] 4 2 3 2 2 2 6 2 6 2</code></pre>
 <pre class="r"><code>levels(map_with_density$density_band)</code></pre>
 <pre><code>## [1] &quot;0-9&quot;     &quot;10-49&quot;   &quot;50-99&quot;   &quot;100-499&quot; &quot;500-999&quot; &quot;1000+&quot;</code></pre>
-<p>Anyway, let’s plot <code>density_band</code>.</p>
+</div>
+<div id="plotting-an-ordinal-variable" class="section level2">
+<h2>Plotting an ordinal variable</h2>
+<p>With our ordinal variable <code>density_band</code> created (see above), let’s plot it.</p>
 <pre class="r"><code>ggplot(map_with_density) + 
   geom_sf(aes(fill=density_band)) + 
   scale_fill_brewer(palette=&quot;YlOrBr&quot;) +
