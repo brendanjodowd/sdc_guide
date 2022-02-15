@@ -555,28 +555,3 @@ My LEA map is based on a 20m generalised map provided by OSi. A generalised map 
 
 Create a file for Gaeltacht areas.
 
-## Simple Interactive map
-
-Interactive maps can be easily created using the leaflet package. Creating an interactive map using leaflet starts with an empty `leaflet` function. Then you can add shapes using `addPolygons`. 
-
-We will see how many of the options for adjusting the appearance of maps with ggplot have similar counterparts in leaflet. There are two differences you should know about at the outset. The first is that with leaflet you build up the map using the pipe ` %>%` whereas with ggplot/geom_sf you add bits using plus `+`. The second difference is that ggplot accepts either the UK or US spellings of colour/color in its functions and arguments, but leaflet always uses the US veersion "color". 
-
-```{r first_leaflet , message=FALSE, warning=FALSE}
-library(leaflet)
-leaflet() %>% 
-  addPolygons(data = lea_166)
-```
-
-## Tailoring interactive maps
-
-Let's tailor the appearance of this map using additional arguments for `addPolygons`. We can specify the colour, line weight and opacity of lines using the arguments `color`, `weight` and `opacity`, and we can specify the fill colour and fill opacity using `fillColor` and `fillOpacity`. We can create a label based on variable that appears when we hover over a region using `label = ` followed by `~` and the variable name.
-
-Let's use these features to create a map where LEAs in the West NUTS3 region are highlighted in green, and all other LEAs are transparent. We'll do this by creating two layers as follows, with a label for LEA name on the topmost layer.
-
-```{r second_leaflet , message=FALSE, warning=FALSE}
-leaflet() %>%  
-  addPolygons(data = lea_166 %>% filter(NUTS3 == "West"),
-              color="black", weight=1 , opacity=1, fillColor="green", fillOpacity=0.3) %>% 
-  addPolygons(data=lea_166, 
-              color="black", weight=1 , opacity=1, fillOpacity=0, label=~LEA)
-```
