@@ -476,7 +476,34 @@ Here is a [guide to inset maps](https://upgo.lab.mcgill.ca/2019/12/13/making-bea
 
 ## Plotting point locations in a map
 
-How to import a csv and convert it so an sf object.
+I'm going to assume a starting point where you have a file that contains coordinates for a bunch of points that you'd like to plot. For this example we'll use the coordinates of Irish train stations as given on [Wikipedia](https://en.wikipedia.org/wiki/List_of_railway_stations_in_Ireland). 
+
+```{r train_station_data , message=FALSE , warning=FALSE}
+stations <- read_csv("assets/train_stations.csv")
+stations[1:8,]
+```
+
+We have the coordinates as latitude and longitude. We need to convert it into an sf object so that we can plot it with `geom_sf()`. We do that using the function `st_as_sf()`. There are two important arguments to this function. The first is `coords`, which takes the names of the two coordinates. We use the newly created variables 'long' and 'lat', where 'long' is the negative of W since it is to the west of the Greenwich Meridian. The second important argument is `crs` which stands for coordinate reference system. This is something that we have not had to deal with so far, but every sf object needs to have a defined coordinate reference system because there are lots of ways of defining coordinate systems. We want to make sure that our locations for train stations are using the same crs as the object `lea_166`, which is 'World Geodetic System 1984'. You can check this by running `st_crs(lea_166)`. We can use `st_crs(lea_166)` as the input for the `crs` argument to the `st_as_sf` function, as shown below, to ensure that both objects are consistent. We could also have put in `"WGS 84"`. 
+
+The `st_as_sf` function creates the `geometry` column and removes the columns `long` and `lat`. At that point we no longer require `N` and `W` so we can remove those as well. 
+
+```{r station_as_sf }
+stations <- stations %>% 
+  mutate(long = -W, lat = N) %>% 
+  st_as_sf(coords = c("long", "lat") , crs = st_crs(lea_166)) %>% 
+  select(-N, -W)
+
+glimpse(stations)
+```
+
+Now we can plot our train stations on top of our map. 
+
+```{r station_first_plot }
+ggplot(lea_166) + 
+  geom_sf() +
+  geom_sf(data = stations)
+  
+```
 
 ## Assigning point locations to regions in the map
 

@@ -582,7 +582,37 @@ ggdraw(main_map) +
 </div>
 <div id="plotting-point-locations-in-a-map" class="section level2">
 <h2>Plotting point locations in a map</h2>
-<p>How to import a csv and convert it so an sf object.</p>
+<p>I’m going to assume a starting point where you have a file that contains coordinates for a bunch of points that you’d like to plot. For this example we’ll use the coordinates of Irish train stations as given on <a href="https://en.wikipedia.org/wiki/List_of_railway_stations_in_Ireland">Wikipedia</a>.</p>
+<pre class="r"><code>stations &lt;- read_csv(&quot;assets/train_stations.csv&quot;)
+stations[1:8,]</code></pre>
+<pre><code>## # A tibble: 8 x 3
+##   Name                      N     W
+##   &lt;chr&gt;                 &lt;dbl&gt; &lt;dbl&gt;
+## 1 Castlerock             55.2  6.79
+## 2 Portrush               55.2  6.65
+## 3 Coleraine              55.1  6.66
+## 4 Dhu Varren halt        55.1  6.39
+## 5 University halt        55.1  6.40
+## 6 Londonderry Waterside  55.0  7.31
+## 7 Ballycarry             54.8  5.73
+## 8 Bellarena              54.7  6.58</code></pre>
+<p>We have the coordinates as latitude and longitude. We need to convert it into an sf object so that we can plot it with <code>geom_sf()</code>. We do that using the function <code>st_as_sf()</code>. There are two important arguments to this function. The first is <code>coords</code>, which takes the names of the two coordinates. We use the newly created variables ‘long’ and ‘lat’, where ‘long’ is the negative of W since it is to the west of the Greenwich Meridian. The second important argument is <code>crs</code> which stands for coordinate reference system. This is something that we have not had to deal with so far, but every sf object needs to have a defined coordinate reference system because there are lots of ways of defining coordinate systems. We want to make sure that our locations for train stations are using the same crs as the object <code>lea_166</code>, which is ‘World Geodetic System 1984’. You can check this by running <code>st_crs(lea_166)</code>. We can use <code>st_crs(lea_166)</code> as the input for the <code>crs</code> argument to the <code>st_as_sf</code> function, as shown below, to ensure that both objects are consistent. We could also have put in <code>"WGS 84"</code>.</p>
+<p>The <code>st_as_sf</code> function creates the <code>geometry</code> column and removes the columns <code>long</code> and <code>lat</code>. At that point we no longer require <code>N</code> and <code>W</code> so we can remove those as well.</p>
+<pre class="r"><code>stations &lt;- stations %&gt;% 
+  mutate(long = -W, lat = N) %&gt;% 
+  st_as_sf(coords = c(&quot;long&quot;, &quot;lat&quot;) , crs = st_crs(lea_166)) %&gt;% 
+  select(-N, -W)
+
+glimpse(stations)</code></pre>
+<pre><code>## Rows: 200
+## Columns: 2
+## $ Name     &lt;chr&gt; &quot;Castlerock&quot;, &quot;Portrush&quot;, &quot;Coleraine&quot;, &quot;Dhu Varren halt&quot;, &quot;Un~
+## $ geometry &lt;POINT [°]&gt; POINT (-6.786944 55.16528), POINT (-6.653696 55.202), P~</code></pre>
+<p>Now we can plot our train stations on top of our map.</p>
+<pre class="r"><code>ggplot(lea_166) + 
+  geom_sf() +
+  geom_sf(data = stations)</code></pre>
+<p><img src="index_files/figure-html/station_first_plot-1.png" width="672" /></p>
 </div>
 <div id="assigning-point-locations-to-regions-in-the-map" class="section level2">
 <h2>Assigning point locations to regions in the map</h2>
