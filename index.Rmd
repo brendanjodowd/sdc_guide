@@ -520,7 +520,8 @@ We can use the function `st_contains` with `lea_166` and `stations`. This return
 
 ```{r stations_in_leas , message=FALSE , warning=FALSE}
 stations_in_leas <- st_contains(lea_166 , stations)
-glimpse(stations_in_leas)
+# Look at the first six entries:
+stations_in_leas[1:6]
   
 ```
 
@@ -532,15 +533,15 @@ The dataframe `stations_in_leas` has the output we want. We could easily calcula
 stations_in_leas <- st_contains(lea_166 , stations) %>% 
   data.frame() %>% 
   left_join(lea_166 %>% 
-              st_drop_geometry() %>% 
-              select(LEA) %>% 
-              mutate(row.id = row_number())) %>% 
+              st_drop_geometry() %>% # get rid of geometry column
+              select(LEA) %>% # choose just the LEA name
+              mutate(row.id = row_number())) %>% # create row.id for matching
   left_join(stations %>% 
-              st_drop_geometry() %>% 
-              select(Name) %>% 
-              mutate(col.id = row_number()))  
+              st_drop_geometry() %>% # get rid of geometry column
+              select(Name) %>% # choose just the station name
+              mutate(col.id = row_number())) # create col.id for matching
 
-glimpse(stations_in_leas)
+head(stations_in_leas)
   
 ```
 ::: {.blue}
