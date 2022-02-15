@@ -423,7 +423,7 @@ ggsave(file = &quot;images/simple_lea_map.png&quot; , plot = simple_lea_map, wid
   geom_sf(aes(fill=Pop2016))</code></pre>
 <p><img src="index_files/figure-html/chloro_1%20-1.png" width="672" /></p>
 <p>Note the <code>aes()</code> function within <code>geom_sf()</code>. This is for aesthetic mappings, and is very commonly used within ggplot for specifying dimensions. Find out more about this function <a href="https://www.rdocumentation.org/packages/ggplot2/versions/3.3.5/topics/aes">here</a>.</p>
-You’ll see that the colour in the plot above varies from dark blue to light blue. There are a few easy ways to choose a different range of colours, and I’ll show two of these here. The first is using <code>scale_fill_distiller</code> which takes an argument <code>palette</code>. Here I’m using the palette <code>YlOrRd</code> which is short for yellow-orange-red.
+<p>You’ll see that the colour in the plot above varies from dark blue to light blue. There are a few easy ways to choose a different range of colours, and I’ll show two of these here. The first is using <code>scale_fill_distiller</code> which takes an argument <code>palette</code>. Here I’m using the palette <code>YlOrRd</code> which is short for yellow-orange-red.</p>
 <style>
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 </style>
@@ -596,11 +596,11 @@ stations[1:8,]</code></pre>
 ## 6 Londonderry Waterside  55.0  7.31
 ## 7 Ballycarry             54.8  5.73
 ## 8 Bellarena              54.7  6.58</code></pre>
-<p>We have the coordinates as latitude and longitude. We need to convert it into an sf object so that we can plot it with <code>geom_sf()</code>. We do that using the function <code>st_as_sf()</code>. There are two important arguments to this function. The first is <code>coords</code>, which takes the names of the two coordinates. We use the newly created variables ‘long’ and ‘lat’, where ‘long’ is the negative of W since it is to the west of the Greenwich Meridian. The second important argument is <code>crs</code> which stands for coordinate reference system. This is something that we have not had to deal with so far, but every sf object needs to have a defined coordinate reference system because there are lots of ways of defining coordinate systems. We want to make sure that our locations for train stations are using the same crs as the object <code>lea_166</code>, which is ‘World Geodetic System 1984’. You can check this by running <code>st_crs(lea_166)</code>. We can use <code>st_crs(lea_166)</code> as the input for the <code>crs</code> argument to the <code>st_as_sf</code> function, as shown below, to ensure that both objects are consistent. We could also have put in <code>"WGS 84"</code>.</p>
+<p>We have the coordinates as latitude and longitude. We need to convert it into an sf object so that we can plot it with <code>geom_sf()</code>. We do that using the function <code>st_as_sf()</code>. There are two important arguments to this function. The first is <code>coords</code>, which takes the names of the two coordinates. We use the newly created variables ‘long’ and ‘lat’, where ‘long’ is the negative of <code>W</code> since it is to the west of the Greenwich Meridian. The second important argument is <code>crs</code> which stands for coordinate reference system. We set this to <code>"WGS 84"</code>, or the EPSG number for this crs which is 4326. This is the same crs used for <code>lea_166</code>, so they are already compatible. You can check this by running <code>st_crs(lea_166)</code>.</p>
 <p>The <code>st_as_sf</code> function creates the <code>geometry</code> column and removes the columns <code>long</code> and <code>lat</code>. At that point we no longer require <code>N</code> and <code>W</code> so we can remove those as well.</p>
 <pre class="r"><code>stations &lt;- stations %&gt;% 
   mutate(long = -W, lat = N) %&gt;% 
-  st_as_sf(coords = c(&quot;long&quot;, &quot;lat&quot;) , crs = st_crs(lea_166)) %&gt;% 
+  st_as_sf(coords = c(&quot;long&quot;, &quot;lat&quot;) , crs = 4326) %&gt;% 
   select(-N, -W)
 
 glimpse(stations)</code></pre>
@@ -608,7 +608,13 @@ glimpse(stations)</code></pre>
 ## Columns: 2
 ## $ Name     &lt;chr&gt; &quot;Castlerock&quot;, &quot;Portrush&quot;, &quot;Coleraine&quot;, &quot;Dhu Varren halt&quot;, &quot;Un~
 ## $ geometry &lt;POINT [°]&gt; POINT (-6.786944 55.16528), POINT (-6.653696 55.202), P~</code></pre>
-<p>Now we can plot our train stations on top of our map.</p>
+<div id="an-aside-on-coordinate-reference-systems" class="section level4 blue">
+<h4>An aside on Coordinate Reference Systems</h4>
+<p>There are lots of different ways of defining coordinate systems, and different systems are used by different organisations and in different countries. When we import or create coordinates in R we need to tell it what coordinate reference system we are using, particularly if we are using spatial coordinates from more than one source. One of the most widely used reference systems is the World Geodetic System (1984 version). This is what is used for <code>lea_166</code> and the <code>stations</code> here. There is a public registry of all of these reference systems called the EPSG Geodetic Parameter Dataset. In this registry every crs has a unique number, and these can be used to identify a crs in R. The EPSG code for World Geodetic System 1984 is 4326.</p>
+<p>When dealing with Irish maps and coordinates, you might come across the Irish Transverse Mercator (ITM) reference system (EPSG code 2157) and perhaps the older Irish Grid (EPSG code 29902).</p>
+<p>If you have two spatial data objects with two different coordinate reference systems, you will need to transform one to match the crs of the other. This is easily done for sf objects using the function <code>st_transform</code>.</p>
+</div>
+<p>Now we can plot our train stations on top of our map. Have a go modifying the points using arguments like <code>size</code>, <code>colour</code> and <code>shape</code> (which takes a numerical value, try <code>shape = 17</code>).</p>
 <pre class="r"><code>ggplot(lea_166) + 
   geom_sf() +
   geom_sf(data = stations)</code></pre>

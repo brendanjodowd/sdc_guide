@@ -9,7 +9,6 @@ output:
     toc_collapsed: true
 ---
 
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -17,12 +16,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Introduction
 
 This guide uses [maps from my GitHub page](https://github.com/brendanjodowd/maps) produced using shapefiles from [OSi](https://data-osi.opendata.arcgis.com/) and [OSNI](https://www.spatialni.gov.uk/).
- 
-Two packages are used throughout, they are [tidyverse](https://tidyverse.tidyverse.org/) and [sf](https://r-spatial.github.io/sf/). Tidyverse is actually a collection of packages that all work together. One of these is called ggplot2, and this is very useful for making nice plots. sf stands for simple features, it is a package for working with spatial data, and it is designed to be compatible with tidyverse. The spatial data objects that you manipulate with the sf package are called 'sf objects'. More on that later. 
 
-To install the collection of tidyverse packages (including ggplot2) run ```install.packages("tidyverse")```, and to install the sf package run ```install.packages("sf")```.
+Two packages are used throughout, they are [tidyverse](https://tidyverse.tidyverse.org/) and [sf](https://r-spatial.github.io/sf/). Tidyverse is actually a collection of packages that all work together. One of these is called ggplot2, and this is very useful for making nice plots. sf stands for simple features, it is a package for working with spatial data, and it is designed to be compatible with tidyverse. The spatial data objects that you manipulate with the sf package are called 'sf objects'. More on that later.
 
-There are alternative packages and approaches in R for producing maps. Other options include the plotting functions in base R and the tmap package. I find that using ggplot2 together with sf offers the best balance of flexibility and ease of use. Alongside the sf package and sf objects there is an older package called sp with associated sp objects, and I would advise against using sp under any circumstances. It has poor compatibility, fewer features and is much more difficult to use.  
+To install the collection of tidyverse packages (including ggplot2) run `install.packages("tidyverse")`, and to install the sf package run `install.packages("sf")`.
+
+There are alternative packages and approaches in R for producing maps. Other options include the plotting functions in base R and the tmap package. I find that using ggplot2 together with sf offers the best balance of flexibility and ease of use. Alongside the sf package and sf objects there is an older package called sp with associated sp objects, and I would advise against using sp under any circumstances. It has poor compatibility, fewer features and is much more difficult to use.
 
 To start, we will need to load both the tidyverse packages and the sf package.
 
@@ -33,57 +32,57 @@ library(sf)
 
 ## Prerequisites
 
-I would like for anyone to be able to begin making their own maps, but some familiarity with R will be required for you to produce maps beyond the examples in this guide. I've listed some of my most-used functions below. Before we get into that I want to point out some of the help tools that are available. 
+I would like for anyone to be able to begin making their own maps, but some familiarity with R will be required for you to produce maps beyond the examples in this guide. I've listed some of my most-used functions below. Before we get into that I want to point out some of the help tools that are available.
 
 ### Help and cheatsheets
 
-The help function in R provides great documentation and examples for all functions. Use it by running ```?``` followed by a function, for example by entering ```?select```. 
+The help function in R provides great documentation and examples for all functions. Use it by running `?` followed by a function, for example by entering `?select`.
 
-There are very good [cheatsheets for different packages on the RStudio website](https://www.rstudio.com/resources/cheatsheets/). One cheatsheet that you won't find on that page but which I think is really useful for beginners is [the one on data wrangling](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf). 
+There are very good [cheatsheets for different packages on the RStudio website](https://www.rstudio.com/resources/cheatsheets/). One cheatsheet that you won't find on that page but which I think is really useful for beginners is [the one on data wrangling](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf).
 
 ### Functions that are good to know
 
-- ```<-``` : the assignment operator in R (shortcut Alt -). E.g. ```x <- 5``` gives ```x``` the value 5. 
-- ```$``` : operator to extract one variable in a dataset, e.g. ```my_data$some_column``` returns ```some_column``` from the dataframe ```my_data```.
-- ```select()``` : subsetting columns
-- ```filter()``` : subsetting rows
-- ```mutate()``` : create new variables
-- ```group_by()``` : prepares a dataframe for operations to be carried out on groups of variables. Use ```ungroup()``` to remove grouping.
-- ```%>%``` : this is the 'pipe' (shortcut Ctrl Shift m), it is a tool for pushing an object through a series of operations. It makes code easier to read and write. 
-- ```c()``` : create a vector.
-- Boolean operators like ```==``` (equal to) ```!=``` (not equal to) ```&``` (and) ```|``` (or) ```%in%``` (in, I use this a lot to see if a string is in a vector of strings). 
+-   `<-` : the assignment operator in R (shortcut Alt -). E.g. `x <- 5` gives `x` the value 5.
+-   `$` : operator to extract one variable in a dataset, e.g. `my_data$some_column` returns `some_column` from the dataframe `my_data`.
+-   `select()` : subsetting columns
+-   `filter()` : subsetting rows
+-   `mutate()` : create new variables
+-   `group_by()` : prepares a dataframe for operations to be carried out on groups of variables. Use `ungroup()` to remove grouping.
+-   `%>%` : this is the 'pipe' (shortcut Ctrl Shift m), it is a tool for pushing an object through a series of operations. It makes code easier to read and write.
+-   `c()` : create a vector.
+-   Boolean operators like `==` (equal to) `!=` (not equal to) `&` (and) `|` (or) `%in%` (in, I use this a lot to see if a string is in a vector of strings).
 
-Not an absolute necessity, but I find myself doing a lot of string matching when I'm making maps in R, and for that I use the ```str_detect()``` function. A very useful resource is the 'String manipulation with stringr cheatsheet', available on the [RStudio Cheatsheets page](https://www.rstudio.com/resources/cheatsheets/). 
+Not an absolute necessity, but I find myself doing a lot of string matching when I'm making maps in R, and for that I use the `str_detect()` function. A very useful resource is the 'String manipulation with stringr cheatsheet', available on the [RStudio Cheatsheets page](https://www.rstudio.com/resources/cheatsheets/).
 
 ## Importing maps
 
-You **should** be able to import my maps directly from the web, using the following, which will create an object called ```lea_166```. 
+You **should** be able to import my maps directly from the web, using the following, which will create an object called `lea_166`.
 
 ```{r import_map , message=FALSE , results="hide"}
 lea_166 <- st_read("https://raw.githubusercontent.com/brendanjodowd/maps/main/lea_166.geojson")
 
 ```
 
-This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total, and a row for each of these, so 167 rows in ```lea_166```. In terms of structure, ```lea_166``` is an 'sf object', where sf stands for simple features. These objects can be manipulated using functions from the sf package and are designed to be compatible with tidyverse functions. An sf object is a special type of dataframe where one of the columns is called ```geometry```, and this contains the coordinates for the shapes corresponding to that row. In our case the geometry column stores multipolygon shapes. There are other types of geometry, including points, lines and multipoints. 
+This is a map of the 166 Local Electoral Areas in Ireland, plus the outline for Northern Ireland, so there are 167 shapes in total, and a row for each of these, so 167 rows in `lea_166`. In terms of structure, `lea_166` is an 'sf object', where sf stands for simple features. These objects can be manipulated using functions from the sf package and are designed to be compatible with tidyverse functions. An sf object is a special type of dataframe where one of the columns is called `geometry`, and this contains the coordinates for the shapes corresponding to that row. In our case the geometry column stores multipolygon shapes. There are other types of geometry, including points, lines and multipoints.
 
-I say **should** in the above because your organisation might not allow R to access the web in this way. If that's the case then you can navigate to the URL in the ```st_read()``` function, and save that page locally as a .geojson file. Then use the file location on your PC as the argument for ```st_read()``` instead of the URL.
+I say **should** in the above because your organisation might not allow R to access the web in this way. If that's the case then you can navigate to the URL in the `st_read()` function, and save that page locally as a .geojson file. Then use the file location on your PC as the argument for `st_read()` instead of the URL.
 
 We will be able to use this map of 166 LEAs (plus Northern Ireland) to create other maps, such as county outlines and NUTS 3 region outlines.
 
-There are 11 columns within ```lea_166```, they are:
+There are 11 columns within `lea_166`, they are:
 
-- LE_ID : an id sometimes used by CSO
-- LEA: The name of the LEA
-- COUNTY: The county of the LEA
-- AREA: area in square kilometres
-- GUID: Globally Unique Identification code, another type of ID
-- NUTS3 and NUTS2: NUTS (Nomenclature of Territorial Units for Statistics) regions are standard country subdivisions used for statistical purposes. 
-- ADMIN_AREA: Ireland's 31 administrative areas. Like COUNTY, except Dublin, Cork, Galway and Limerick are broken up. 
-- cso_name: a version of the name of the LEA which may be matched to CSO datasets
-- Pop2016: The population of the LEA according to Census 2016 data.
-- geometry: a list-column containing the geographic coordinates for each LEA.
+-   LE_ID : an id sometimes used by CSO
+-   LEA: The name of the LEA
+-   COUNTY: The county of the LEA
+-   AREA: area in square kilometres
+-   GUID: Globally Unique Identification code, another type of ID
+-   NUTS3 and NUTS2: NUTS (Nomenclature of Territorial Units for Statistics) regions are standard country subdivisions used for statistical purposes.
+-   ADMIN_AREA: Ireland's 31 administrative areas. Like COUNTY, except Dublin, Cork, Galway and Limerick are broken up.
+-   cso_name: a version of the name of the LEA which may be matched to CSO datasets
+-   Pop2016: The population of the LEA according to Census 2016 data.
+-   geometry: a list-column containing the geographic coordinates for each LEA.
 
-You can have a look at ```lea_166``` using the ```glimpse()``` function:
+You can have a look at `lea_166` using the `glimpse()` function:
 
 ```{r glimpse}
 glimpse(lea_166)
@@ -91,15 +90,15 @@ glimpse(lea_166)
 
 ## First plot
 
-Let's take a quick look at the map that we now have using ggplot. 
+Let's take a quick look at the map that we now have using ggplot.
 
 ```{r first_plot , message=FALSE , results="hide"}
 ggplot(lea_166) + geom_sf()
 ```
 
-This structure of using ```ggplot()``` followed by ```+ geom_XXX()``` will be familiar to users of ggplot (```XXX``` here might be ```line```, ```bar``` etc. depending on the type of plot). 
+This structure of using `ggplot()` followed by `+ geom_XXX()` will be familiar to users of ggplot (`XXX` here might be `line`, `bar` etc. depending on the type of plot).
 
-Extra layers can be added through additional ```geom_sf``` functions, as we shall see later. These additional ```geom_sf``` functions will require a ```data``` argument to specify the associated dataframe — the first ```geom_sf``` takes its dataframe from the initial ```ggplot``` function. Thus the code structure for a layered plot looks something like the following. 
+Extra layers can be added through additional `geom_sf` functions, as we shall see later. These additional `geom_sf` functions will require a `data` argument to specify the associated dataframe --- the first `geom_sf` takes its dataframe from the initial `ggplot` function. Thus the code structure for a layered plot looks something like the following.
 
 ```{r plot_structure , eval=FALSE }
 # pseudocode 
@@ -109,22 +108,21 @@ ggplot(base_map) +
   geom_sf(data = another_layer)
 ```
 
-You could put ```base_map``` into the first ```geom_sf``` function with a ```data``` argument like the subsequent layers, but (a) that is not the convention that I have seen, and (b) I think it can cause problems not to have any dataframe in ```ggplot()``` if you are adding annotations to the plot. 
+You could put `base_map` into the first `geom_sf` function with a `data` argument like the subsequent layers, but (a) that is not the convention that I have seen, and (b) I think it can cause problems not to have any dataframe in `ggplot()` if you are adding annotations to the plot.
 
 <!-- Note that the following piece of code is equivalent, and doesn't require ```data = ```: -->
 
 <!-- ```{r first_plot_alternative , eval=FALSE } -->
+
 <!-- ggplot(lea_166) + geom_sf() -->
+
 <!-- ``` -->
 
 <!-- Even though this layout is probably more commonly used, I will be using the previous layout because later on I'll be using multiple ```geom_sf()``` functions to build up a plot in layers, and I find that the dataframe being used is less ambiguous that way.  -->
 
- 
-
-
 ## Maps of counties and NUTS regions
 
-Maps for counties, admin areas, NUTS2 and NUTS3 regions can be produced using ```lea_166```. To produce a map of counties, for example, use the code below. The key function here is ```st_union()``` which can be used to join sf objects. 
+Maps for counties, admin areas, NUTS2 and NUTS3 regions can be produced using `lea_166`. To produce a map of counties, for example, use the code below. The key function here is `st_union()` which can be used to join sf objects.
 
 ```{r aggregating , message=FALSE , results="hide"}
 county_map <- lea_166 %>% 
@@ -132,9 +130,9 @@ county_map <- lea_166 %>%
   summarise(geometry = st_union(geometry) , AREA=sum(AREA))
 ```
 
-Note that ```county_map``` has only 3 columns, which are ```COUNTY```, ```geometry``` and ```AREA```. ```AREA``` is calculated for each county using the ```sum()``` function above. You could do something similar for ```Pop2016``` if you wished. All other columns are lost in the ```summarise()``` step.
+Note that `county_map` has only 3 columns, which are `COUNTY`, `geometry` and `AREA`. `AREA` is calculated for each county using the `sum()` function above. You could do something similar for `Pop2016` if you wished. All other columns are lost in the `summarise()` step.
 
-Let's plot ```county_map``` to see what it looks like.
+Let's plot `county_map` to see what it looks like.
 
 ```{r county_plot , message=FALSE , results="hide"}
 ggplot(county_map) + geom_sf()
@@ -142,9 +140,9 @@ ggplot(county_map) + geom_sf()
 
 Try making a similar plot of the NUTS3 regions.
 
-##  Colouring in selected areas of the map
+## Colouring in selected areas of the map
 
-Let's start with the LEA map and let's say we want all of the LEAs in the Border to be coloured in green. We can make a new dataframe called ```border_leas``` using ```filter``` as follows:
+Let's start with the LEA map and let's say we want all of the LEAs in the Border to be coloured in green. We can make a new dataframe called `border_leas` using `filter` as follows:
 
 ```{r border_filter , message=FALSE , results="hide"}
 border_leas <- lea_166 %>% 
@@ -159,7 +157,7 @@ ggplot(lea_166) +
   geom_sf(data = border_leas , fill="green")
 ```
 
-Note that we could have done the filter step within the ```geom_sf()``` function if we wanted to, like so:
+Note that we could have done the filter step within the `geom_sf()` function if we wanted to, like so:
 
 ```{r first_green_plot_alt, eval=FALSE}
 ggplot(lea_166) + 
@@ -176,7 +174,7 @@ selected_areas <- lea_166 %>%
          ! str_detect(LEA , "Cork City")) 
 ```
 
-Note the use of ```!``` above in front of the ```str_detect``` function, which negates or produces the opposite of the logical expression in front of it. You could have used ```&``` instead of the commas in the argument of ```filter``` above, but using logical AND as well as logical OR can be ambiguous (brackets ought to be used). Anyway, let's plot ```selected_areas```. 
+Note the use of `!` above in front of the `str_detect` function, which negates or produces the opposite of the logical expression in front of it. You could have used `&` instead of the commas in the argument of `filter` above, but using logical AND as well as logical OR can be ambiguous (brackets ought to be used). Anyway, let's plot `selected_areas`.
 
 ```{r second_green_plot , message=FALSE , results="hide"}
 ggplot(lea_166) + 
@@ -184,9 +182,9 @@ ggplot(lea_166) +
   geom_sf(data = selected_areas , fill="green")
 ```
 
-## Adding more layers and using ```theme_void()```
+## Adding more layers and using `theme_void()`
 
-Let's take the previous map and add dark outlines for the NUTS 3 regions. First we need to create the dataframe for the NUTS outlines, which we'll do in the same way that the county outlines were produced above, using ```group_by``` and ```summarise``` with ```st_union```. 
+Let's take the previous map and add dark outlines for the NUTS 3 regions. First we need to create the dataframe for the NUTS outlines, which we'll do in the same way that the county outlines were produced above, using `group_by` and `summarise` with `st_union`.
 
 ```{r nuts_outline_1 , message=FALSE , results="hide"}
 nuts_outline <- lea_166 %>% 
@@ -194,13 +192,13 @@ nuts_outline <- lea_166 %>%
   summarise(geometry = st_union(geometry))
 ```
 
-I'm going to set the ```fill``` for the NUTS 3 outlines to ```NA``` which means it won't have any fill colour, then set the line colour to black using ```colour="black"```. I'll set the line width to 1 using ```size=1```. 
+I'm going to set the `fill` for the NUTS 3 outlines to `NA` which means it won't have any fill colour, then set the line colour to black using `colour="black"`. I'll set the line width to 1 using `size=1`.
 
-Note that in ggplot, ```fill``` always refers to the colour used to fill in shapes, and ```colour``` always refers to line colours. Most of the functions you'll see which refer to ```fill``` will have an analagous version with ```colour``` and vice versa.  
+Note that in ggplot, `fill` always refers to the colour used to fill in shapes, and `colour` always refers to line colours. Most of the functions you'll see which refer to `fill` will have an analagous version with `colour` and vice versa.
 
-Let's add another coloured layer, we'll make all of Dublin blue. I'll put the line of code for this before the code for the NUTS 3 outline, that way the blue fill won't partially obscure that outline. 
+Let's add another coloured layer, we'll make all of Dublin blue. I'll put the line of code for this before the code for the NUTS 3 outline, that way the blue fill won't partially obscure that outline.
 
-I'm also going to add ```theme_void()``` here. With ggplot there are lots of different themes you can add to change the appearance of your plot, but for maps the only one I really use is ```theme_void()```. It's effect is to remove the axes and give you a clear background.
+I'm also going to add `theme_void()` here. With ggplot there are lots of different themes you can add to change the appearance of your plot, but for maps the only one I really use is `theme_void()`. It's effect is to remove the axes and give you a clear background.
 
 ```{r nuts_outline_2 , message=FALSE , results="hide"}
 nuts_outline <- lea_166 %>% 
@@ -217,7 +215,7 @@ ggplot(lea_166) +
 
 ## Creating named objects from plots
 
-Rather than simply plotting a ggplot object immediately, you can turn it into an object in the R environment with its own name. For example, let's take the first three lines of the previous ```ggplot``` statement and make an object called ```base_plot```:
+Rather than simply plotting a ggplot object immediately, you can turn it into an object in the R environment with its own name. For example, let's take the first three lines of the previous `ggplot` statement and make an object called `base_plot`:
 
 ```{r base_plot , message=FALSE , results="hide"}
 base_plot <- ggplot(lea_166) + 
@@ -225,7 +223,7 @@ base_plot <- ggplot(lea_166) +
   geom_sf(data = selected_areas , fill="green") 
 ```
 
-Now we can add to this as we please (resulting plot not shown, it's the same as previous image). You might like to try this approach if you are making several plots which have a certain amount of detail in common. 
+Now we can add to this as we please (resulting plot not shown, it's the same as previous image). You might like to try this approach if you are making several plots which have a certain amount of detail in common.
 
 ```{r base_plot_2 , eval=FALSE }
 base_plot + 
@@ -236,13 +234,13 @@ base_plot +
 
 ## Saving plots
 
-The function used to save plots is ```ggsave```. By default it saves the last plot displayed. The code below shows how it is used. You can adjust the height, width and units depending on your needs. 
+The function used to save plots is `ggsave`. By default it saves the last plot displayed. The code below shows how it is used. You can adjust the height, width and units depending on your needs.
 
 ```{r ggsave , message=FALSE , results="hide"}
 ggsave(file = "images/map_with_selected_areas.png" , width=18, height = 24, units="cm") 
 ```
 
-You can save a named plot to file using the using ```plot = ``` argument within ```ggsave```. Let's create ```simple_lea_map``` and save that. 
+You can save a named plot to file using the using `plot =` argument within `ggsave`. Let's create `simple_lea_map` and save that.
 
 ```{r ggsave_2 , eval=FALSE}
 simple_lea_map <- ggplot(lea_166) + geom_sf()
@@ -252,28 +250,29 @@ ggsave(file = "images/simple_lea_map.png" , plot = simple_lea_map, width=18, hei
 
 ## Plotting continuous variables
 
-Let's say we want to create a map where the colour varies in proportion to a particular variable (a chloropleth). We'll make one where the colour varies by population in each LEA, since this is already a column on ```lea_166``` (the variable name is Pop2016). We can do that as follows:
+Let's say we want to create a map where the colour varies in proportion to a particular variable (a chloropleth). We'll make one where the colour varies by population in each LEA, since this is already a column on `lea_166` (the variable name is Pop2016). We can do that as follows:
 
 ```{r chloro_1 , message=FALSE , results="hide"}
 ggplot(lea_166) + 
   geom_sf(aes(fill=Pop2016))
 ```
 
-Note the ```aes()``` function within ```geom_sf()```. This is for aesthetic mappings, and is very commonly used within ggplot for specifying dimensions. Find out more about this function [here](https://www.rdocumentation.org/packages/ggplot2/versions/3.3.5/topics/aes). 
+Note the `aes()` function within `geom_sf()`. This is for aesthetic mappings, and is very commonly used within ggplot for specifying dimensions. Find out more about this function [here](https://www.rdocumentation.org/packages/ggplot2/versions/3.3.5/topics/aes).
 
+You'll see that the colour in the plot above varies from dark blue to light blue. There are a few easy ways to choose a different range of colours, and I'll show two of these here. The first is using `scale_fill_distiller` which takes an argument `palette`. Here I'm using the palette `YlOrRd` which is short for yellow-orange-red.
 
-You'll see that the colour in the plot above varies from dark blue to light blue. There are a few easy ways to choose a different range of colours, and I'll show two of these here. The first is using ```scale_fill_distiller``` which takes an argument ```palette```. Here I'm using the palette ```YlOrRd``` which is short for yellow-orange-red. 
+```{=html}
 <style>
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 </style>
-<div class = "blue">
+```
+::: {.blue}
 #### An aside on palettes
-There are 35 different palettes supplied with ```scale_fill_distiller```. You can check out the list of these on the help page for the function (run ```?scale_fill_distiller```). There are three type of palette: **sequential**, which are all light to dark and are designed for data that goes from low to high; **qualitative**, which are a mix of contrasting colours used for categorical data; and **diverging**, which have a dark colour at each end and a very light colour in the middle, and these are best suited where the midpoint in the range requires some emphasis.
 
-</div>
+There are 35 different palettes supplied with `scale_fill_distiller`. You can check out the list of these on the help page for the function (run `?scale_fill_distiller`). There are three type of palette: **sequential**, which are all light to dark and are designed for data that goes from low to high; **qualitative**, which are a mix of contrasting colours used for categorical data; and **diverging**, which have a dark colour at each end and a very light colour in the middle, and these are best suited where the midpoint in the range requires some emphasis.
+:::
 
-
-There is another argument to ```scale_fill_distiller``` that is worth knowing which is ```direction```, and this can be used to flip the palette, e.g. from dark to light instead of light to dark. By default it is equal to ```-1```, so set it to ```1``` to reverse. 
+There is another argument to `scale_fill_distiller` that is worth knowing which is `direction`, and this can be used to flip the palette, e.g. from dark to light instead of light to dark. By default it is equal to `-1`, so set it to `1` to reverse.
 
 ```{r chloro_2 , message=FALSE , results="hide"}
 ggplot(lea_166) + 
@@ -281,7 +280,7 @@ ggplot(lea_166) +
   scale_fill_distiller(palette = "YlOrRd")
 ```
 
-Another useful function for specifying your own gradient is ```scale_fill_gradient2```. This takes three colours for ```low```, ```mid``` and ```high```, and then a value for the midpoint (which will take the ```mid``` colour). See the example below. You might also be interested in two variations of this function, one simpler and one more complex. The simpler version is ```scale_fill_gradient``` which takes a high and low colour but no midpoint. Then the more complex version is ```scale_fill_gradientn``` which can make a gradient from a longer series of colours passed as a vector to the argument ```colours = ``` , e.g. ```scale_fill_gradientn(colours=c("blue", "green", "yellow", "red"))```. Often ```scale_fill_gradientn``` takes a built-in palette rather than a vector of named colours, e.g. ```scale_fill_gradientn(colours=rainbow(6))```.
+Another useful function for specifying your own gradient is `scale_fill_gradient2`. This takes three colours for `low`, `mid` and `high`, and then a value for the midpoint (which will take the `mid` colour). See the example below. You might also be interested in two variations of this function, one simpler and one more complex. The simpler version is `scale_fill_gradient` which takes a high and low colour but no midpoint. Then the more complex version is `scale_fill_gradientn` which can make a gradient from a longer series of colours passed as a vector to the argument `colours =` , e.g. `scale_fill_gradientn(colours=c("blue", "green", "yellow", "red"))`. Often `scale_fill_gradientn` takes a built-in palette rather than a vector of named colours, e.g. `scale_fill_gradientn(colours=rainbow(6))`.
 
 ```{r chloro_3 , message=FALSE , results="hide"}
 ggplot(lea_166) + 
@@ -291,9 +290,9 @@ ggplot(lea_166) +
 
 ## Legend title and format
 
-The map above is nice, but we would probably prefer if the legend title said "Population" instead of "Pop2016". If you are using a ```scale_fill_...``` function then the easiest thing is to add ```name = "Population"``` to that function. Otherwise you can specify a label for any plot dimension, including fill colour, using the ```labs``` function. For fill colour that would look like ```labs(fill = "Population")```.
+The map above is nice, but we would probably prefer if the legend title said "Population" instead of "Pop2016". If you are using a `scale_fill_...` function then the easiest thing is to add `name = "Population"` to that function. Otherwise you can specify a label for any plot dimension, including fill colour, using the `labs` function. For fill colour that would look like `labs(fill = "Population")`.
 
-I also want to adjust the appearance of the numbers in the legend so that they have a thousand comma separator. In other circumstances you might want to format the variable with a percent symbol. This is best handled using the [scales](https://scales.r-lib.org/) package, which has some very useful functions for formatting numbers generally. We can add ```label = comma``` to whatever ```scale_fill_...``` function is being used (use ```scale_fill_continuous()``` if no other ```scale_fill_...``` function is used). If your continuous variable was from zero to one but you wanted it as a percentage then you would use ```label = percent```.
+I also want to adjust the appearance of the numbers in the legend so that they have a thousand comma separator. In other circumstances you might want to format the variable with a percent symbol. This is best handled using the [scales](https://scales.r-lib.org/) package, which has some very useful functions for formatting numbers generally. We can add `label = comma` to whatever `scale_fill_...` function is being used (use `scale_fill_continuous()` if no other `scale_fill_...` function is used). If your continuous variable was from zero to one but you wanted it as a percentage then you would use `label = percent`.
 
 ```{r title_format , message=FALSE , results="hide"}
 library(scales)
@@ -306,7 +305,7 @@ ggplot(lea_166) +
 
 ## Hatching and cross hatching selected areas
 
-Unfortunately there is no built-in means of hatching an area using ggplot, but I found a useful work-around on Stack Overflow [here](https://stackoverflow.com/a/59301874/15703221). The code to generate a pattern is shown below. The function ```hatch_pattern``` takes three arguments: shape, which is the region (sf object) that you want to show with a hatch; scale, which is a number used to adjust the spacing of the hatch; and pattern which has four options for the direction of the lines in the hatch.
+Unfortunately there is no built-in means of hatching an area using ggplot, but I found a useful work-around on Stack Overflow [here](https://stackoverflow.com/a/59301874/15703221). The code to generate a pattern is shown below. The function `hatch_pattern` takes three arguments: shape, which is the region (sf object) that you want to show with a hatch; scale, which is a number used to adjust the spacing of the hatch; and pattern which has four options for the direction of the lines in the hatch.
 
 ```{r hatch_pattern , message=FALSE , results="hide"}
 hatch_pattern <- function(shape, scale, pattern) {
@@ -329,7 +328,7 @@ hatch_pattern <- function(shape, scale, pattern) {
 }
 ```
 
-Now let's use it to cover County Galway in a green hatch with line from top left to bottom right. I use ```colour = "green"``` and ```size=0.8``` within the ```geom_sf()``` function to control the colour and line thickness respectively. 
+Now let's use it to cover County Galway in a green hatch with line from top left to bottom right. I use `colour = "green"` and `size=0.8` within the `geom_sf()` function to control the colour and line thickness respectively.
 
 ```{r hatch_galway , message=FALSE , results="hide"}
 galway_hatch <- hatch_pattern(shape = lea_166 %>% filter(COUNTY=="Galway"), 
@@ -341,13 +340,13 @@ ggplot(lea_166) +
   geom_sf(data = galway_hatch, colour = "green", size=0.8)
 ```
 
-If you are being finnicky you might like to add ```lea_166``` again in another ```geom_sf``` layer, this time with ```fill = NA```, so that the LEA boundaries lie on top of the hatch, and not the other way around. 
+If you are being finnicky you might like to add `lea_166` again in another `geom_sf` layer, this time with `fill = NA`, so that the LEA boundaries lie on top of the hatch, and not the other way around.
 
-You can make a crosshatch by creating a second hatch with pattern "right2left" and overlaying this with another ```geom_sf``` function. 
+You can make a crosshatch by creating a second hatch with pattern "right2left" and overlaying this with another `geom_sf` function.
 
-## Cropping/zooming in 
+## Cropping/zooming in
 
-We need to distinguish between two types of zooming in here. One kind of zoom is where we plot just one subset of the map, and the other is where the whole map "exists" but we are cropping out a specific piece. 
+We need to distinguish between two types of zooming in here. One kind of zoom is where we plot just one subset of the map, and the other is where the whole map "exists" but we are cropping out a specific piece.
 
 Let do the first kind of zoom where we plot just the LEAs in County Dublin.
 
@@ -357,9 +356,9 @@ dublin_map <- lea_166 %>% filter(COUNTY=="Dublin")
 ggplot(dublin_map) + geom_sf()
 ```
 
-Now let's do the type where the map is cropped. This is achieved using ```coord_sf```, wherein the limits are defined using ```xlim``` and ```ylim```. Note the negative values in ```xlim()``` since we are west of the Greenwich meridian. 
+Now let's do the type where the map is cropped. This is achieved using `coord_sf`, wherein the limits are defined using `xlim` and `ylim`. Note the negative values in `xlim()` since we are west of the Greenwich meridian.
 
-If you look closely at the plot you will notice that the full extent of the map is a little bit larger than the area specified by the limits provided, there is a certain amount of 'padding' on all four sides. This 'expand' feature is on by default, but can be turned off by adding ```expand = FALSE``` to the ```coord_sf``` function.
+If you look closely at the plot you will notice that the full extent of the map is a little bit larger than the area specified by the limits provided, there is a certain amount of 'padding' on all four sides. This 'expand' feature is on by default, but can be turned off by adding `expand = FALSE` to the `coord_sf` function.
 
 ```{r dublin_crop , message=FALSE , results="hide"}
 ggplot(lea_166) + 
@@ -367,10 +366,9 @@ ggplot(lea_166) +
   coord_sf(xlim = c(-6.65,-5.95) , ylim = c(53.18, 53.65))
 ```
 
-
 ## Creating ordinal variable from continuous variable
 
-Suppose we want to plot a map with an ordinal variable, which is like a category but has some ordering from low to high. We might make an ordinal variable from a continuous variable by assigning values into bands. A good example here would be population density. Let's make a new column for population density and try to plot it. 
+Suppose we want to plot a map with an ordinal variable, which is like a category but has some ordering from low to high. We might make an ordinal variable from a continuous variable by assigning values into bands. A good example here would be population density. Let's make a new column for population density and try to plot it.
 
 ```{r pop_dens_1 , message=FALSE , results="hide"}
 map_with_density <- lea_166 %>% 
@@ -379,9 +377,9 @@ map_with_density <- lea_166 %>%
 ggplot(map_with_density) + geom_sf(aes(fill=pop_density))
 ```
 
-As we can see this is pretty unsatisfactory, too much of the detail is squashed into the top of the scale. It would make more sense to divide LEAs into bands with roughly equal numbers in each. There are tools for dividing a continuous scale into equally sized groups like quintiles, but I prefer to specify the bands myself so that the breaks are nice rounded figures. 
+As we can see this is pretty unsatisfactory, too much of the detail is squashed into the top of the scale. It would make more sense to divide LEAs into bands with roughly equal numbers in each. There are tools for dividing a continuous scale into equally sized groups like quintiles, but I prefer to specify the bands myself so that the breaks are nice rounded figures.
 
-We can make a new variable called ```density_band``` from ```pop_density``` using the ```cut``` function. See how the first value is the variable to make intervals from, then it has arguments ```breaks``` and ```labels``` each of which takes a vector. Note that the vector for ```breaks``` must be one element longer than that for ```labels```.
+We can make a new variable called `density_band` from `pop_density` using the `cut` function. See how the first value is the variable to make intervals from, then it has arguments `breaks` and `labels` each of which takes a vector. Note that the vector for `breaks` must be one element longer than that for `labels`.
 
 ```{r cut_function , message=FALSE , results="hide"}
 map_with_density <- lea_166 %>% 
@@ -391,9 +389,9 @@ map_with_density <- lea_166 %>%
                                          labels = c("0-9", "10-49", "50-99", "100-499","500-999", "1000+")))
 ```
 
-The important thing about the ```cut``` function is that the value it creates is a **factor**. Factors are used to represent categorical data and they can have an underlying order applied to them. When we plot a factor using ```ggplot``` it will take that order into account when applying the palette and creating the legend. In this case the order is determined by our vectors ```break``` and ```labels```.
+The important thing about the `cut` function is that the value it creates is a **factor**. Factors are used to represent categorical data and they can have an underlying order applied to them. When we plot a factor using `ggplot` it will take that order into account when applying the palette and creating the legend. In this case the order is determined by our vectors `break` and `labels`.
 
-The structure of a factor is a little bit complicated. Very briefly, the labels that we make are a character attribute associated with the variable, and the underlying data is stored as a series of integers The following three lines of code might illustrate this better. The first line prints the first five entries of ```density_band```, but it also shows the six labels associated with ```density_band```. The second line of code uses ```as.integer``` to extract the internal codes for those first ten entries. Note that 1 corresponds to ```"0-9"```, 2 corresponds to ```"10-49"```, etc. Finally, the last line here uses the function ```levels``` to return the levels of the factor. 
+The structure of a factor is a little bit complicated. Very briefly, the labels that we make are a character attribute associated with the variable, and the underlying data is stored as a series of integers The following three lines of code might illustrate this better. The first line prints the first five entries of `density_band`, but it also shows the six labels associated with `density_band`. The second line of code uses `as.integer` to extract the internal codes for those first ten entries. Note that 1 corresponds to `"0-9"`, 2 corresponds to `"10-49"`, etc. Finally, the last line here uses the function `levels` to return the levels of the factor.
 
 ```{r glimpse_density}
 map_with_density$density_band[1:10]
@@ -405,7 +403,7 @@ levels(map_with_density$density_band)
 
 ## Plotting an ordinal variable
 
-With our ordinal variable ```density_band``` created (see above), let's plot it. 
+With our ordinal variable `density_band` created (see above), let's plot it.
 
 ```{r density_band_plot , message=FALSE , results="hide"}
 ggplot(map_with_density) + 
@@ -414,7 +412,7 @@ ggplot(map_with_density) +
   theme_void()
 ```
 
-I'm just going to add one or two more bits to spruce up this plot. I would like the NA colour (for Northern Ireland) to be a more distinctive colour so it's not confused with the ```"0-19"``` band. This is done using the ```na.value``` argument within ```scale_fill_brewer```. However I'd also like to remove the NA from the legend. I'll do that by specifying ```limits``` in the ```scale_fill_brewer``` function. The ```limits``` argument puts limits on what the scale will cover, anything outside of those limits will not appear in the legend. I'll set the limits to be equal to the levels of the variable ```density_band```, that way the NA will disappear from the legend. Finally, I'm going to use ```name = ``` in the ```scale_fill_brewer``` function to make a nice title for the legend. This time however, I'm using the function ```expression``` within the ```name``` argument because I want to insert a squared symbol for km^2^. 
+I'm just going to add one or two more bits to spruce up this plot. I would like the NA colour (for Northern Ireland) to be a more distinctive colour so it's not confused with the `"0-19"` band. This is done using the `na.value` argument within `scale_fill_brewer`. However I'd also like to remove the NA from the legend. I'll do that by specifying `limits` in the `scale_fill_brewer` function. The `limits` argument puts limits on what the scale will cover, anything outside of those limits will not appear in the legend. I'll set the limits to be equal to the levels of the variable `density_band`, that way the NA will disappear from the legend. Finally, I'm going to use `name =` in the `scale_fill_brewer` function to make a nice title for the legend. This time however, I'm using the function `expression` within the `name` argument because I want to insert a squared symbol for km^2^.
 
 ```{r density_band_plot_2 , message=FALSE , results="hide"}
 ggplot(map_with_density) + 
@@ -428,11 +426,11 @@ ggplot(map_with_density) +
 
 ## Insets
 
-Let's say that we want a map with an inset for Dublin City. The easiest way I have found for doing this is using the [cowplot package](https://www.rdocumentation.org/packages/cowplot/versions/1.1.1), which helps you to make compound images. We will create our map for the whole country and then add a layer on top of this for our inset using the ```draw_plot``` function from cowplot. 
+Let's say that we want a map with an inset for Dublin City. The easiest way I have found for doing this is using the [cowplot package](https://www.rdocumentation.org/packages/cowplot/versions/1.1.1), which helps you to make compound images. We will create our map for the whole country and then add a layer on top of this for our inset using the `draw_plot` function from cowplot.
 
-We'll start by making a map for the whole country. We'll use the first example from the gradient colour guide above and create a named object from it called ```main_map```. We'll need to make a couple of alterations for this plot. First we'll add ```theme_void()``` to get rid of the axes. Then we'll add a black rectangle to the map around the Dublin City area so that users know where the inset is from. 
+We'll start by making a map for the whole country. We'll use the first example from the gradient colour guide above and create a named object from it called `main_map`. We'll need to make a couple of alterations for this plot. First we'll add `theme_void()` to get rid of the axes. Then we'll add a black rectangle to the map around the Dublin City area so that users know where the inset is from.
 
-Finally, before we add the inset layer, I want to make the legend smaller and move it up to the top left corner so that the inset can sit close to Dublin where the default legend position is. Fortunately, it is possible to tune the size of all the components of the legend (text, title, colour bar), but unfortunately it is not possible to scale the whole legend all at once — each component must be scaled individually. This is done within the ```theme``` function as shown below. 
+Finally, before we add the inset layer, I want to make the legend smaller and move it up to the top left corner so that the inset can sit close to Dublin where the default legend position is. Fortunately, it is possible to tune the size of all the components of the legend (text, title, colour bar), but unfortunately it is not possible to scale the whole legend all at once --- each component must be scaled individually. This is done within the `theme` function as shown below.
 
 ```{r insets_main_map , message=FALSE , results="hide"}
 
@@ -452,7 +450,7 @@ main_map <- ggplot(lea_166) +
 main_map
 ```
 
-Now let's make the inset map. It is ```main_map``` plus ```coord_sf``` to crop to the same coordinates as the black rectangle. Note the use of ```expand = FALSE``` to remove the padding; otherwise the black rectangle would sit a little bit inside the inset plot. I've also added an extra ```theme``` function to get rid of the legend since we don't need an extra legend in the inset. 
+Now let's make the inset map. It is `main_map` plus `coord_sf` to crop to the same coordinates as the black rectangle. Note the use of `expand = FALSE` to remove the padding; otherwise the black rectangle would sit a little bit inside the inset plot. I've also added an extra `theme` function to get rid of the legend since we don't need an extra legend in the inset.
 
 ```{r insets_inset_map , message=FALSE , results="hide"}
 inset_map <- main_map + 
@@ -462,8 +460,7 @@ inset_map <- main_map +
 inset_map
 ```
 
-Now we can produce the finished product with the ```main_map``` and the ```inset_map```. We use ```ggdraw``` and ```draw_plot``` as shown below. The other arguments to ```draw_plot``` (```x```, ```y```, ```width```, ```height```) provide the size and position of the inset relative to the plot area. 
-
+Now we can produce the finished product with the `main_map` and the `inset_map`. We use `ggdraw` and `draw_plot` as shown below. The other arguments to `draw_plot` (`x`, `y`, `width`, `height`) provide the size and position of the inset relative to the plot area.
 
 ```{r inset_map_complete , message=FALSE , results="hide", warning=FALSE}
 library(cowplot)
@@ -472,31 +469,41 @@ ggdraw(main_map) +
   draw_plot({inset_map} , x = 0.65, y = 0.35 , width = 0.35, height = 0.4) 
 ```
 
-Here is a [guide to inset maps](https://upgo.lab.mcgill.ca/2019/12/13/making-beautiful-maps/) that I found helpful. 
+Here is a [guide to inset maps](https://upgo.lab.mcgill.ca/2019/12/13/making-beautiful-maps/) that I found helpful.
 
 ## Plotting point locations in a map
 
-I'm going to assume a starting point where you have a file that contains coordinates for a bunch of points that you'd like to plot. For this example we'll use the coordinates of Irish train stations as given on [Wikipedia](https://en.wikipedia.org/wiki/List_of_railway_stations_in_Ireland). 
+I'm going to assume a starting point where you have a file that contains coordinates for a bunch of points that you'd like to plot. For this example we'll use the coordinates of Irish train stations as given on [Wikipedia](https://en.wikipedia.org/wiki/List_of_railway_stations_in_Ireland).
 
 ```{r train_station_data , message=FALSE , warning=FALSE}
 stations <- read_csv("assets/train_stations.csv")
 stations[1:8,]
 ```
 
-We have the coordinates as latitude and longitude. We need to convert it into an sf object so that we can plot it with `geom_sf()`. We do that using the function `st_as_sf()`. There are two important arguments to this function. The first is `coords`, which takes the names of the two coordinates. We use the newly created variables 'long' and 'lat', where 'long' is the negative of W since it is to the west of the Greenwich Meridian. The second important argument is `crs` which stands for coordinate reference system. This is something that we have not had to deal with so far, but every sf object needs to have a defined coordinate reference system because there are lots of ways of defining coordinate systems. We want to make sure that our locations for train stations are using the same crs as the object `lea_166`, which is 'World Geodetic System 1984'. You can check this by running `st_crs(lea_166)`. We can use `st_crs(lea_166)` as the input for the `crs` argument to the `st_as_sf` function, as shown below, to ensure that both objects are consistent. We could also have put in `"WGS 84"`. 
+We have the coordinates as latitude and longitude. We need to convert it into an sf object so that we can plot it with `geom_sf()`. We do that using the function `st_as_sf()`. There are two important arguments to this function. The first is `coords`, which takes the names of the two coordinates. We use the newly created variables 'long' and 'lat', where 'long' is the negative of `W` since it is to the west of the Greenwich Meridian. The second important argument is `crs` which stands for coordinate reference system. We set this to `"WGS 84"`, or the EPSG number for this crs which is 4326. This is the same crs used for `lea_166`, so they are already compatible. You can check this by running `st_crs(lea_166)`.
 
-The `st_as_sf` function creates the `geometry` column and removes the columns `long` and `lat`. At that point we no longer require `N` and `W` so we can remove those as well. 
+The `st_as_sf` function creates the `geometry` column and removes the columns `long` and `lat`. At that point we no longer require `N` and `W` so we can remove those as well.
 
 ```{r station_as_sf }
 stations <- stations %>% 
   mutate(long = -W, lat = N) %>% 
-  st_as_sf(coords = c("long", "lat") , crs = st_crs(lea_166)) %>% 
+  st_as_sf(coords = c("long", "lat") , crs = 4326) %>% 
   select(-N, -W)
 
 glimpse(stations)
 ```
 
-Now we can plot our train stations on top of our map. 
+::: {.blue}
+#### An aside on Coordinate Reference Systems
+
+There are lots of different ways of defining coordinate systems, and different systems are used by different organisations and in different countries. When we import or create coordinates in R we need to tell it what coordinate reference system we are using, particularly if we are using spatial coordinates from more than one source. One of the most widely used reference systems is the World Geodetic System (1984 version). This is what is used for `lea_166` and the `stations` here. There is a public registry of all of these reference systems called the EPSG Geodetic Parameter Dataset. In this registry every crs has a unique number, and these can be used to identify a crs in R. The EPSG code for World Geodetic System 1984 is 4326. 
+
+When dealing with Irish maps and coordinates, you might come across the Irish Transverse Mercator (ITM) reference system (EPSG code 2157) and perhaps the older Irish Grid (EPSG code 29902). 
+
+If you have two spatial data objects with two different coordinate reference systems, you will need to transform one to match the crs of the other. This is easily done for sf objects using the function `st_transform`. 
+:::
+
+Now we can plot our train stations on top of our map. Have a go modifying the points using arguments like `size`, `colour` and `shape` (which takes a numerical value, try `shape = 17`).
 
 ```{r station_first_plot }
 ggplot(lea_166) + 
@@ -507,7 +514,6 @@ ggplot(lea_166) +
 
 ## Assigning point locations to regions in the map
 
-
 ## Overlapping areas and calculating area
 
-Create a file for Gaeltacht areas. 
+Create a file for Gaeltacht areas.
