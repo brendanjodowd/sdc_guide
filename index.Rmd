@@ -43,6 +43,7 @@ head(company_sales_1)
 Here we will produce aggregate sales data broken down across the two dimensions, County and Aid. We want aggregates for all Counties ("Connaught") and all companies including those that did and did not receive aid. 
 
 The key steps are as follows:
+
 1. Create hierarchies using `hier_create`
 2. Create sdcProblem object using `makeProblem`
 3. Primary suppression using `primarySuppression`

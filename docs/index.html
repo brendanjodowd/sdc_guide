@@ -275,7 +275,14 @@ head(company_sales_1)</code></pre>
 <div id="simple-run-through" class="section level2">
 <h2>Simple run-through</h2>
 <p>Here we will produce aggregate sales data broken down across the two dimensions, County and Aid. We want aggregates for all Counties (“Connaught”) and all companies including those that did and did not receive aid.</p>
-<p>The key steps are as follows: 1. Create hierarchies using <code>hier_create</code> 2. Create sdcProblem object using <code>makeProblem</code> 3. Primary suppression using <code>primarySuppression</code> 4. Secondary suppression using <code>protectTable</code> 5. Review outputs using <code>getInfo</code></p>
+<p>The key steps are as follows:</p>
+<ol style="list-style-type: decimal">
+<li>Create hierarchies using <code>hier_create</code></li>
+<li>Create sdcProblem object using <code>makeProblem</code></li>
+<li>Primary suppression using <code>primarySuppression</code></li>
+<li>Secondary suppression using <code>protectTable</code></li>
+<li>Review outputs using <code>getInfo</code></li>
+</ol>
 <p>The objects created at steps 2, 3 and 4 may appear complex at first, but they will make sense when we examine them.</p>
 <p>Later we will see more complex examples, but they will build from this simple example and will follow the same sequence as outlined above.</p>
 <div id="creating-hierachies" class="section level3">
