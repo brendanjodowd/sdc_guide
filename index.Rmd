@@ -13,12 +13,77 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Introduction
+## What this guide is about
 
-A guide to using the [sdcTable package](https://cran.r-project.org/web/packages/sdcTable/vignettes/sdcTable.html) for R.
+This is a guide for implementing Statistical Disclosure Controls (SDC) on tabular data using R with the [sdcTable package](https://cran.r-project.org/web/packages/sdcTable/vignettes/sdcTable.html). It will include a range of different circumstances that I have encountered. 
+
+This guide does not give a comprehensive overview on the SDC generally. The CSO have produced an excellent guide on [Best Practice for Statistical Disclosure Control of Tabular Data](https://www.cso.ie/en/media/csoie/aboutus-new/dataforresearchers/CSO_Guidance_on_Tabular_SDC.docx) (docx, 365KB).
+
+Statistical Disclosure Controls (SDC) are measures that protect against the publication of information relating to an individual person, company or organisation. Implementing robust SDC provides assurance to data providers that their data won't be inadvertently made public. As mentioned already, this guide covers cell suppression in tabular outputs, which is generally required where certain cross-tabulations are sparsely populated. 'Unsafe cells' are identified for *primary suppression*. Usually other cells need to be suppressed too, so that the value of an unsafe cell cannot be deduced using the aggregate totals and remaining data, and this is called *secondary suppression*. 
+
+## Setup
+
+As well as the [sdcTable package](https://cran.r-project.org/web/packages/sdcTable/vignettes/sdcTable.html) for R, we will be using the [tidyverse](https://tidyverse.tidyverse.org/) collection of packages throughout.
 
 ```{r packages , message=FALSE, warning=FALSE}
 library(tidyverse)
 library(sdcTable)
 ```
 
+We will start with a dataset called `company_sales_1` which can be imported into R as a csv. This dataset contains sales information for 60 fictional companies located in Connaught. There are five columns, the ID and Name of each company, then the COunty in which it is located, a Y/N indicator to indicate if the company received some kind of aid, and the value of Sales for the year.
+
+```{r import_1 , message=FALSE, warning=FALSE}
+company_sales_1 <- read_csv("input/company_sales_1.csv")
+
+head(company_sales_1)
+```
+
+## Simple run-through
+
+Here we will produce aggregate sales data broken down across the two dimensions, County and Aid. We want aggregates for all Counties ("Connaught") and all companies including those that did and did not receive aid. 
+
+The key steps are as follows:
+1. Create hierarchies using `hier_create`
+2. Create sdcProblem object using `makeProblem`
+3. Primary suppression using `primarySuppression`
+4. Secondary suppression using `protectTable`
+5. Review outputs using `getInfo`
+
+The objects created at steps 2, 3 and 4 may appear complex at first, but they will make sense when we examine them. 
+
+Later we will see more complex examples, but they will build from this simple example and will follow the same sequence as outlined above. 
+
+### Creating hierachies
+
+We will create a hierarchy for each of our two dimensions called `dimCounty` and `dimAid`. This is done using the `hier_create` function from the `sdcTable` package as shown below. The total category is identified as the 'root' of the hierarchy. Note that this total name/classification does not exist in the microdata. The underlying classifications are then created using the `nodes` argument to the function. There are other ways of creating hierarchies, either as a matrix or by creating them in a csv and importing that, which could be useful if you have a hierarchy with a large number of classifications. 
+
+```{r hier_1 , message=FALSE, warning=FALSE}
+dimCounty <- hier_create(root = "Connaught",
+                         nodes = c("Galway",
+                                   "Leitrim",
+                                   "Mayo",
+                                   "Roscommon",
+                                   "Sligo"))
+
+dimAid <- hier_create(root = "All companies",
+                      nodes = c("Y",
+                                "N"))
+```
+We can view our hierarchies using the function `hier_display`.
+
+```{r display_1 , message=FALSE, warning=FALSE}
+hier_display(dimCounty)
+
+hier_display(dimAid)
+```
+
+### Creating sdcProblem object using `makeProblem`
+
+We use the function `makeProblem` to create an object of class `sdcProblem` as shown below. We are making use of three arguments: `data`, which is the dataset containing the microdata; `dimList`, which is a list object containing the hierarchies that we have created, each identified using a name which matches the name of the variable as it appears in the microdata; and `numVarInd`, the name of the variable containing the numerical data that we want to aggregate.
+
+
+```{r prob_1 , message=FALSE, warning=FALSE}
+sdc_problem <- makeProblem(data = company_sales_1,
+                           dimList = list(County = dimCounty, Aid = dimAid),
+                           numVarInd = "Sales")
+```

@@ -247,11 +247,70 @@ div.tocify {
 </div>
 
 
-<div id="introduction" class="section level2">
-<h2>Introduction</h2>
-<p>A guide to using the <a href="https://cran.r-project.org/web/packages/sdcTable/vignettes/sdcTable.html">sdcTable package</a> for R.</p>
+<div id="what-this-guide-is-about" class="section level2">
+<h2>What this guide is about</h2>
+<p>This is a guide for implementing Statistical Disclosure Controls (SDC) on tabular data using R with the <a href="https://cran.r-project.org/web/packages/sdcTable/vignettes/sdcTable.html">sdcTable package</a>. It will include a range of different circumstances that I have encountered.</p>
+<p>This guide does not give a comprehensive overview on the SDC generally. The CSO have produced an excellent guide on <a href="https://www.cso.ie/en/media/csoie/aboutus-new/dataforresearchers/CSO_Guidance_on_Tabular_SDC.docx">Best Practice for Statistical Disclosure Control of Tabular Data</a> (docx, 365KB).</p>
+<p>Statistical Disclosure Controls (SDC) are measures that protect against the publication of information relating to an individual person, company or organisation. Implementing robust SDC provides assurance to data providers that their data won’t be inadvertently made public. As mentioned already, this guide covers cell suppression in tabular outputs, which is generally required where certain cross-tabulations are sparsely populated. ‘Unsafe cells’ are identified for <em>primary suppression</em>. Usually other cells need to be suppressed too, so that the value of an unsafe cell cannot be deduced using the aggregate totals and remaining data, and this is called <em>secondary suppression</em>.</p>
+</div>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<p>As well as the <a href="https://cran.r-project.org/web/packages/sdcTable/vignettes/sdcTable.html">sdcTable package</a> for R, we will be using the <a href="https://tidyverse.tidyverse.org/">tidyverse</a> collection of packages throughout.</p>
 <pre class="r"><code>library(tidyverse)
 library(sdcTable)</code></pre>
+<p>We will start with a dataset called <code>company_sales_1</code> which can be imported into R as a csv. This dataset contains sales information for 60 fictional companies located in Connaught. There are five columns, the ID and Name of each company, then the COunty in which it is located, a Y/N indicator to indicate if the company received some kind of aid, and the value of Sales for the year.</p>
+<pre class="r"><code>company_sales_1 &lt;- read_csv(&quot;input/company_sales_1.csv&quot;)
+
+head(company_sales_1)</code></pre>
+<pre><code>## # A tibble: 6 x 5
+##      ID Name              County Aid   Sales
+##   &lt;dbl&gt; &lt;chr&gt;             &lt;chr&gt;  &lt;chr&gt; &lt;dbl&gt;
+## 1     1 Jones Engineering Galway Y       779
+## 2     2 Mike&#39;s Bakery     Galway Y       825
+## 3     3 Falafel Inc       Galway Y       342
+## 4     4 Galway Windows    Galway Y       563
+## 5     5 Tuam Tech Ltd     Galway Y       328
+## 6     6 Joe Farm Supplies Galway Y       184</code></pre>
+</div>
+<div id="simple-run-through" class="section level2">
+<h2>Simple run-through</h2>
+<p>Here we will produce aggregate sales data broken down across the two dimensions, County and Aid. We want aggregates for all Counties (“Connaught”) and all companies including those that did and did not receive aid.</p>
+<p>The key steps are as follows: 1. Create hierarchies using <code>hier_create</code> 2. Create sdcProblem object using <code>makeProblem</code> 3. Primary suppression using <code>primarySuppression</code> 4. Secondary suppression using <code>protectTable</code> 5. Review outputs using <code>getInfo</code></p>
+<p>The objects created at steps 2, 3 and 4 may appear complex at first, but they will make sense when we examine them.</p>
+<p>Later we will see more complex examples, but they will build from this simple example and will follow the same sequence as outlined above.</p>
+<div id="creating-hierachies" class="section level3">
+<h3>Creating hierachies</h3>
+<p>We will create a hierarchy for each of our two dimensions called <code>dimCounty</code> and <code>dimAid</code>. This is done using the <code>hier_create</code> function from the <code>sdcTable</code> package as shown below. The total category is identified as the ‘root’ of the hierarchy. Note that this total name/classification does not exist in the microdata. The underlying classifications are then created using the <code>nodes</code> argument to the function. There are other ways of creating hierarchies, either as a matrix or by creating them in a csv and importing that, which could be useful if you have a hierarchy with a large number of classifications.</p>
+<pre class="r"><code>dimCounty &lt;- hier_create(root = &quot;Connaught&quot;,
+                         nodes = c(&quot;Galway&quot;,
+                                   &quot;Leitrim&quot;,
+                                   &quot;Mayo&quot;,
+                                   &quot;Roscommon&quot;,
+                                   &quot;Sligo&quot;))
+
+dimAid &lt;- hier_create(root = &quot;All companies&quot;,
+                      nodes = c(&quot;Y&quot;,
+                                &quot;N&quot;))</code></pre>
+<p>We can view our hierarchies using the function <code>hier_display</code>.</p>
+<pre class="r"><code>hier_display(dimCounty)</code></pre>
+<pre><code>## Connaught
+## +-Galway
+## +-Leitrim
+## +-Mayo
+## +-Roscommon
+## \-Sligo</code></pre>
+<pre class="r"><code>hier_display(dimAid)</code></pre>
+<pre><code>## All companies
+## +-Y
+## \-N</code></pre>
+</div>
+<div id="creating-sdcproblem-object-using-makeproblem" class="section level3">
+<h3>Creating sdcProblem object using <code>makeProblem</code></h3>
+<p>We use the function <code>makeProblem</code> to create an object of class <code>sdcProblem</code> as shown below. We are making use of three arguments: <code>data</code>, which is the dataset containing the microdata; <code>dimList</code>, which is a list object containing the hierarchies that we have created, each identified using a name which matches the name of the variable as it appears in the microdata; and <code>numVarInd</code>, the name of the variable containing the numerical data that we want to aggregate.</p>
+<pre class="r"><code>sdc_problem &lt;- makeProblem(data = company_sales_1,
+                           dimList = list(County = dimCounty, Aid = dimAid),
+                           numVarInd = &quot;Sales&quot;)</code></pre>
+</div>
 </div>
 
 
