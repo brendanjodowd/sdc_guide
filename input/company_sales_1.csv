@@ -1,0 +1,61 @@
+﻿ID,Name,Sales,County,Aid
+1,Jones Engineering,779,Galway,Y
+2,Mike's Bakery,825,Galway,Y
+3,Falafel Inc,342,Galway,Y
+4,Galway Windows,563,Galway,Y
+5,Tuam Tech Ltd,328,Galway,Y
+6,Joe Farm Supplies,184,Galway,Y
+7,Smith Catering,800,Galway,Y
+8,Lavelle Tool Hire,453,Galway,Y
+9,Hyde Accontants,496,Galway,Y
+10,Nolan Metals,843,Galway,N
+11,Thomas Meats,48,Galway,N
+12,Duffy Wiring,154,Galway,N
+13,Ryan Publishing,999,Galway,N
+14,Connor Software,355,Galway,N
+15,O'Malley Bookkeeping,126,Galway,N
+16,Moycullen Fire Safety,442,Galway,N
+17,Ballinasloe Sports Centre,860,Galway,N
+18,Spiddal Crane Hire,509,Galway,N
+19,Loughrea Fuels,6,Galway,N
+20,Lakeside Hotel,544,Galway,N
+21,Belmullet Fisheries,30,Mayo,Y
+22,Ballycastle Fertilisers,782,Mayo,Y
+23,Shane's Wallpaper,799,Mayo,Y
+24,Nephin Tours Ltd,905,Mayo,Y
+25,Achill Meat Processing,682,Mayo,N
+26,Castlebar Hotel,100,Mayo,N
+27,Foxford Dairy,102,Mayo,N
+28,Thompson Footwear,215,Mayo,N
+29,Sweeney Undertakers,373,Mayo,N
+30,Newport Wines,750,Mayo,N
+31,Leitrim Whiskey Company,232,Leitrim,Y
+32,Mohill Auto Sales,905,Leitrim,Y
+33,McDonnell Air Conditioning,31,Leitrim,Y
+34,Dunleavy Civil Engineering,84,Leitrim,Y
+35,N16 Service Station,258,Leitrim,N
+36,Ballinamore Glazing,353,Leitrim,N
+37,Casey Stationery,0,Leitrim,N
+38,Fitzpatrick Counselling,795,Leitrim,N
+39,Frenchpark Properties,304,Roscommon,Y
+40,Strokestown Taxi Company,339,Roscommon,Y
+41,Roscommon Timber,277,Roscommon,Y
+42,Foley Seafood,531,Roscommon,Y
+43,Blake Electronics,957,Roscommon,Y
+44,Murphy Freight,716,Roscommon,N
+45,Castlerea Couriers,836,Roscommon,N
+46,Donovan Event Management,209,Roscommon,N
+47,Regan Bar Supplies,101,Roscommon,N
+48,Kenny Programming,983,Roscommon,N
+49,Griffin Insurance,644,Roscommon,N
+50,Boyle Paints,763,Roscommon,N
+51,Whelan Surf School,872,Sligo,Y
+52,Buckley Consultants,288,Sligo,Y
+53,Burton Design,507,Sligo,Y
+54,Ballymote Landscaping,514,Sligo,Y
+55,Flynn Orthopedics,69,Sligo,N
+56,Easky Childcare,532,Sligo,N
+57,Maguire Poultry,394,Sligo,N
+58,Collins General Store,826,Sligo,N
+59,Tobercurry Dressmaking,695,Sligo,N
+60,Enniscrone Mining,294,Sligo,N
