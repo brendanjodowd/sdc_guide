@@ -250,8 +250,8 @@ div.tocify {
 <div id="what-this-guide-is-about" class="section level2">
 <h2>What this guide is about</h2>
 <p>This is a guide for implementing Statistical Disclosure Controls (SDC) on tabular data using R with the <a href="https://cran.r-project.org/web/packages/sdcTable/vignettes/sdcTable.html">sdcTable package</a>. It will include a range of different circumstances that I have encountered.</p>
-<p>This guide does not give a comprehensive overview on the SDC generally. The CSO have produced an excellent guide on <a href="https://www.cso.ie/en/media/csoie/aboutus-new/dataforresearchers/CSO_Guidance_on_Tabular_SDC.docx">Best Practice for Statistical Disclosure Control of Tabular Data</a> (docx, 365KB).</p>
-<p>Statistical Disclosure Controls (SDC) are measures that protect against the publication of information relating to an individual person, company or organisation. Implementing robust SDC provides assurance to data providers that their data won’t be inadvertently made public. As mentioned already, this guide covers cell suppression in tabular outputs, which is generally required where certain cross-tabulations are sparsely populated. ‘Unsafe cells’ are identified for <em>primary suppression</em>. Usually other cells need to be suppressed too, so that the value of an unsafe cell cannot be deduced using the aggregate totals and remaining data, and this is called <em>secondary suppression</em>.</p>
+<p>This guide does not give a general overview on SDC. The CSO have produced a very good document on <a href="https://www.cso.ie/en/media/csoie/aboutus-new/dataforresearchers/CSO_Guidance_on_Tabular_SDC.docx">Best Practice for Statistical Disclosure Control of Tabular Data</a> (docx, 365KB).</p>
+<p>Statistical Disclosure Controls are measures that protect against the publication of information relating to an individual person, company or organisation. Implementing robust SDC provides assurance to data providers that their data won’t be inadvertently made public. As mentioned already, this guide covers cell suppression in tabular outputs, which is generally required where certain cross-tabulations are sparsely populated. ‘Unsafe cells’ are identified for <em>primary suppression</em>. Usually other cells need to be suppressed too, so that the value of an unsafe cell cannot be deduced using the aggregate totals and remaining data, and this is called <em>secondary suppression</em>.</p>
 </div>
 <div id="setup" class="section level2">
 <h2>Setup</h2>
@@ -283,10 +283,10 @@ head(company_sales_1)</code></pre>
 <li>Secondary suppression using <code>protectTable</code></li>
 <li>Review outputs using <code>getInfo</code></li>
 </ol>
-<p>The objects created at steps 2, 3 and 4 may appear complex at first, but they will make sense when we examine them.</p>
-<p>Later we will see more complex examples, but they will build from this simple example and will follow the same sequence as outlined above.</p>
+<p>The objects created at steps 2, 3 and 4 have a class and structure which is specific to the package <code>sdcTable</code>. They may appear complex at first, but we will see how to get the necessary information out of them.</p>
+<p>Later sections will show more complex cases which will be presented as variations of this simple example.</p>
 <div id="creating-hierachies" class="section level3">
-<h3>Creating hierachies</h3>
+<h3>1. Creating hierachies</h3>
 <p>We will create a hierarchy for each of our two dimensions called <code>dimCounty</code> and <code>dimAid</code>. This is done using the <code>hier_create</code> function from the <code>sdcTable</code> package as shown below. The total category is identified as the ‘root’ of the hierarchy. Note that this total name/classification does not exist in the microdata. The underlying classifications are then created using the <code>nodes</code> argument to the function. There are other ways of creating hierarchies, either as a matrix or by creating them in a csv and importing that, which could be useful if you have a hierarchy with a large number of classifications.</p>
 <pre class="r"><code>dimCounty &lt;- hier_create(root = &quot;Connaught&quot;,
                          nodes = c(&quot;Galway&quot;,
@@ -311,12 +311,45 @@ dimAid &lt;- hier_create(root = &quot;All companies&quot;,
 ## +-Y
 ## \-N</code></pre>
 </div>
-<div id="creating-sdcproblem-object-using-makeproblem" class="section level3">
-<h3>Creating sdcProblem object using <code>makeProblem</code></h3>
+<div id="setting-up-the-sdc-problem" class="section level3">
+<h3>2. Setting up the SDC problem</h3>
 <p>We use the function <code>makeProblem</code> to create an object of class <code>sdcProblem</code> as shown below. We are making use of three arguments: <code>data</code>, which is the dataset containing the microdata; <code>dimList</code>, which is a list object containing the hierarchies that we have created, each identified using a name which matches the name of the variable as it appears in the microdata; and <code>numVarInd</code>, the name of the variable containing the numerical data that we want to aggregate.</p>
-<pre class="r"><code>sdc_problem &lt;- makeProblem(data = company_sales_1,
+<pre class="r"><code>sales_sdc_problem &lt;- makeProblem(data = company_sales_1,
                            dimList = list(County = dimCounty, Aid = dimAid),
                            numVarInd = &quot;Sales&quot;)</code></pre>
+<p>The object <code>sales_sdc_problem</code> has a specific class called ‘sdcProblem’. It contains information about the microdata, the hierarchies, and protection parameters generated by the function <code>makeProblem</code>. To learn more about the contents of this object see the <a href="https://www.rdocumentation.org/packages/sdcTable/versions/0.31/topics/sdcProblem-class">documentation</a>. In the next step we will use it to carry out primary suppression.</p>
+</div>
+<div id="primary-suppression" class="section level3">
+<h3>3. Primary suppression</h3>
+<p>Primary suppression is carried out using the function <code>primarySuppression</code>. The first argument is the sdcProblem object (<code>sales_sdc_problem</code>, in our case), and the second argument is <code>type</code>. This can take one of four values:</p>
+<ul>
+<li><code>"freq"</code> for frequency rule with additional parameter <code>maxN</code> for the maximum number of entities in an unsafe cell (default value is 3)</li>
+<li><code>"nk"</code> for nk-dominance rule with additional parameters <code>n</code> and <code>k</code> (defaults of 2 and 85 respectively, meaning that in a safe cell two entities cannot contribute more than 85% of the aggregate value)</li>
+<li><code>"p"</code> for p-percent rule with additional parameter <code>p</code> (default value of 80, meaning that in a safe cell, if the two largest contributors were removed then the remaining value has to be greater than 80% of the largest contributor)</li>
+<li><code>"pq"</code> for the pq-rule with additional parameter <code>pq</code> which is a vector of length two. (The default value of pq is <code>c(25,50)</code>, meaning that in a safe cell, if the two largest contributors are removed then 50% of the remaining value should be greater than 25% of the largest contributor.)</li>
+</ul>
+<p>For the <code>"nk"</code>, <code>"p"</code> and <code>"pq"</code> options there is one further mandatory argument to define the name of numerical variable which is <code>numVarName</code>.</p>
+<p>Here we’ll use the nk-dominance rule with default parameters:</p>
+<pre class="r"><code>sales_sdc_primary &lt;- primarySuppression(sales_sdc_problem, 
+                                        type = &quot;nk&quot;, 
+                                        numVarName = &quot;Sales&quot;)</code></pre>
+<p>The output from this function, which we have called <code>sales_sdc_primary</code>, is of the same class ‘sdcProblem’ as the input object <code>sales_sdc_problem</code>. However the primary suppression rule has been implemented which we can see if we look at the slot called ‘sdcStatus’. We can use the function <code>getInfo</code> to do this. This function is part of the sdcTable package, and it allows us to query the objects that are made through the suppression process. Here we see that in <code>sales_sdc_problem</code> there are 18 cells marked ‘s’ for ‘safe’, but in <code>sales_sdc_primary</code> which has had primary suppression applied, there is one cell marked ‘u’ for ’unsafe.</p>
+<pre class="r"><code>getInfo(sales_sdc_problem, type=&quot;sdcStatus&quot;)</code></pre>
+<pre><code>##  [1] &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot;</code></pre>
+<pre class="r"><code>getInfo(sales_sdc_primary, type=&quot;sdcStatus&quot;)</code></pre>
+<pre><code>##  [1] &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;u&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot;</code></pre>
+</div>
+<div id="secondary-suppresion" class="section level3">
+<h3>4. Secondary suppresion</h3>
+<p>Secondary suppression is carried out using the function <code>protectTable</code> which has two main arguments. The first argument is the sdcProblem object to which primary suppression has already been applied (<code>sales_sdc_primary</code> in our case). The second main argument is <code>method</code> which allows us to choose an algorithm for secondary suppression. There are four options, and here I am copying the descriptions from the <a href="https://www.rdocumentation.org/packages/sdcTable/versions/0.32.2/topics/protectTable">Help page for this function</a>:</p>
+<ul>
+<li>“OPT”: protect the complete problem at once using a cut and branch algorithm. The optimal algorithm should be used for small problem-instances only.</li>
+<li>“HITAS”: split the overall problem in smaller problems. These problems are protected using a top-down approach.</li>
+<li>“HYPERCUBE”: protect the complete problem by protecting sub-tables with a fast heuristic that is based on finding and suppressing geometric structures (n-dimensional cubes) that are required to protect primary sensitive table cells.</li>
+<li>“SIMPLEHEURISTIC” and “SIMPLEHEURISTIC_OLD”: heuristic procedures which might be applied to large(r) problem instances.</li>
+</ul>
+<p>There are some other arguments for parameters to these algorithms that can be varied but I have not used them. You can investigate them yourself on the <a href="https://www.rdocumentation.org/packages/sdcTable/versions/0.32.2/topics/protectTable">Help page for <code>protectTable</code></a>.</p>
+<pre class="r"><code>sales_sdc_secondary &lt;- protectTable(sales_sdc_primary, method = &quot;HITAS&quot;)</code></pre>
 </div>
 </div>
 
