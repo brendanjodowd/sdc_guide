@@ -1,0 +1,61 @@
+ID,Name,County,Aid,Sales
+1,Jones Engineering,Galway City,Y,779
+2,Mike's Bakery,Galway City,Y,825
+3,Falafel Inc,Galway City,N,342
+4,Galway Windows,Galway City,Y,563
+5,Tuam Tech Ltd,Galway City,N,328
+6,Joe Farm Supplies,Galway City,N,184
+7,Smith Catering,Galway City,Y,800
+8,Lavelle Tool Hire,Galway City,N,453
+9,Hyde Accontants,Galway City,N,496
+10,Nolan Metals,Galway County,Y,843
+11,Thomas Meats,Galway County,Y,48
+12,Duffy Wiring,Galway County,N,154
+13,Ryan Publishing,Galway County,Y,999
+14,Connor Software,Galway County,N,355
+15,O'Malley Bookkeeping,Galway County,N,126
+16,Moycullen Fire Safety,Galway County,N,442
+17,Ballinasloe Sports Centre,Galway County,N,860
+18,Spiddal Crane Hire,Galway County,N,509
+19,Loughrea Fuels,Galway County,Y,6
+20,Lakeside Hotel,Galway County,N,544
+21,Belmullet Fisheries,Mayo,Y,30
+22,Ballycastle Fertilisers,Mayo,Y,782
+23,Shane's Wallpaper,Mayo,Y,799
+24,Nephin Tours Ltd,Mayo,Y,905
+25,Achill Meat Processing,Mayo,N,682
+26,Castlebar Hotel,Mayo,N,100
+27,Foxford Dairy,Mayo,N,102
+28,Thompson Footwear,Mayo,N,215
+29,Sweeney Undertakers,Mayo,N,373
+30,Newport Wines,Mayo,N,750
+31,Leitrim Whiskey Company,Leitrim,Y,232
+32,Mohill Auto Sales,Leitrim,Y,905
+33,McDonnell Air Conditioning,Leitrim,Y,31
+34,Dunleavy Civil Engineering,Leitrim,Y,84
+35,N16 Service Station,Leitrim,N,258
+36,Ballinamore Glazing,Leitrim,N,353
+37,Casey Stationery,Leitrim,N,0
+38,Fitzpatrick Counselling,Leitrim,N,795
+39,Frenchpark Properties,Roscommon,Y,304
+40,Strokestown Taxi Company,Roscommon,Y,339
+41,Roscommon Timber,Roscommon,Y,277
+42,Foley Seafood,Roscommon,Y,531
+43,Blake Electronics,Roscommon,Y,957
+44,Murphy Freight,Roscommon,N,716
+45,Castlerea Couriers,Roscommon,N,836
+46,Donovan Event Management,Roscommon,N,209
+47,Regan Bar Supplies,Roscommon,N,101
+48,Kenny Programming,Roscommon,N,983
+49,Griffin Insurance,Roscommon,N,644
+50,Boyle Paints,Roscommon,N,763
+51,Whelan Surf School,Sligo,Y,872
+52,Buckley Consultants,Sligo,Y,288
+53,Burton Design,Sligo,Y,507
+54,Ballymote Landscaping,Sligo,Y,514
+55,Flynn Orthopedics,Sligo,N,69
+56,Easky Childcare,Sligo,N,532
+57,Maguire Poultry,Sligo,N,394
+58,Collins General Store,Sligo,N,826
+59,Tobercurry Dressmaking,Sligo,N,695
+60,Enniscrone Mining,Sligo,N,294

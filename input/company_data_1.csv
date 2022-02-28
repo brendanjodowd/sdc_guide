@@ -1,0 +1,61 @@
+ID,Name,County,Sales,Input Costs,Value Added 
+1,Jones Engineering,Galway,779,616,163
+2,Mike's Bakery,Galway,825,348,477
+3,Falafel Inc,Galway,342,100,242
+4,Galway Windows,Galway,563,349,214
+5,Tuam Tech Ltd,Galway,328,301,27
+6,Joe Farm Supplies,Galway,184,170,14
+7,Smith Catering,Galway,800,697,103
+8,Lavelle Tool Hire,Galway,453,235,218
+9,Hyde Accontants,Galway,496,450,46
+10,Nolan Metals,Galway,843,820,23
+11,Thomas Meats,Galway,48,39,9
+12,Duffy Wiring,Galway,154,95,59
+13,Ryan Publishing,Galway,999,505,494
+14,Connor Software,Galway,355,230,125
+15,O'Malley Bookkeeping,Galway,126,100,26
+16,Moycullen Fire Safety,Galway,442,400,42
+17,Ballinasloe Sports Centre,Galway,860,615,245
+18,Spiddal Crane Hire,Galway,509,233,276
+19,Loughrea Fuels,Galway,6,2,4
+20,Lakeside Hotel,Galway,544,480,64
+21,Belmullet Fisheries,Mayo,30,10,20
+22,Ballycastle Fertilisers,Mayo,978,50,928
+23,Shane's Wallpaper,Mayo,799,85,714
+24,Nephin Tours Ltd,Mayo,905,853,52
+25,Achill Meat Processing,Mayo,682,651,31
+26,Castlebar Hotel,Mayo,100,70,30
+27,Foxford Dairy,Mayo,102,73,29
+28,Thompson Footwear,Mayo,215,199,16
+29,Sweeney Undertakers,Mayo,373,319,54
+30,Newport Wines,Mayo,750,710,40
+31,Leitrim Whiskey Company,Leitrim,232,212,20
+32,Mohill Auto Sales,Leitrim,905,800,105
+33,McDonnell Air Conditioning,Leitrim,31,15,16
+34,Dunleavy Civil Engineering,Leitrim,84,34,50
+35,N16 Service Station,Leitrim,258,219,39
+36,Ballinamore Glazing,Leitrim,353,327,26
+37,Casey Stationery,Leitrim,0,0,0
+38,Fitzpatrick Counselling,Leitrim,795,262,533
+39,Frenchpark Properties,Roscommon,304,104,200
+40,Strokestown Taxi Company,Roscommon,339,250,89
+41,Roscommon Timber,Roscommon,277,177,100
+42,Foley Seafood,Roscommon,531,320,211
+43,Blake Electronics,Roscommon,957,503,454
+44,Murphy Freight,Roscommon,716,484,232
+45,Castlerea Couriers,Roscommon,836,587,249
+46,Donovan Event Management,Roscommon,209,67,142
+47,Regan Bar Supplies,Roscommon,101,50,51
+48,Kenny Programming,Roscommon,983,945,38
+49,Griffin Insurance,Roscommon,644,566,78
+50,Boyle Paints,Roscommon,763,448,315
+51,Whelan Surf School,Sligo,872,681,191
+52,Buckley Consultants,Sligo,288,189,99
+53,Burton Design,Sligo,507,459,48
+54,Ballymote Landscaping,Sligo,514,216,298
+55,Flynn Orthopedics,Sligo,69,60,9
+56,Easky Childcare,Sligo,532,374,158
+57,Maguire Poultry,Sligo,394,237,157
+58,Collins General Store,Sligo,826,492,334
+59,Tobercurry Dressmaking,Sligo,695,617,78
+60,Enniscrone Mining,Sligo,294,209,85

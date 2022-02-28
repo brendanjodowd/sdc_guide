@@ -290,22 +290,21 @@ head(company_sales_1)</code></pre>
 <p>We need to define a hierarchy for each of our two dimensions <code>County</code> and <code>Aid</code> which we shall call <code>dimCounty</code> and <code>dimAid</code>. These are created using the <code>hier_create</code> function from the <code>sdcTable</code> package as shown below. The total category is identified as the ‘root’ of the hierarchy. Note that this total name/classification does not exist in the microdata. The underlying classifications are then created using the <code>nodes</code> argument to the function. There are other ways of creating hierarchies, either as a matrix or by creating them in a csv and importing that, which could be useful if you have a hierarchy with a large number of classifications.</p>
 <pre class="r"><code>dimCounty &lt;- hier_create(root = &quot;Connaught&quot;,
                          nodes = c(&quot;Galway&quot;,
-                                   &quot;Leitrim&quot;,
                                    &quot;Mayo&quot;,
                                    &quot;Roscommon&quot;,
-                                   &quot;Sligo&quot;))
+                                   &quot;Sligo&quot;,
+                                   &quot;Leitrim&quot;))
 
 dimAid &lt;- hier_create(root = &quot;All companies&quot;,
-                      nodes = c(&quot;Y&quot;,
-                                &quot;N&quot;))</code></pre>
+                      nodes = c(&quot;Y&quot;, &quot;N&quot;))</code></pre>
 <p>We can view our hierarchies using the function <code>hier_display</code>.</p>
 <pre class="r"><code>hier_display(dimCounty)</code></pre>
 <pre><code>## Connaught
 ## +-Galway
-## +-Leitrim
 ## +-Mayo
 ## +-Roscommon
-## \-Sligo</code></pre>
+## +-Sligo
+## \-Leitrim</code></pre>
 <pre class="r"><code>hier_display(dimAid)</code></pre>
 <pre><code>## All companies
 ## +-Y
@@ -313,7 +312,12 @@ dimAid &lt;- hier_create(root = &quot;All companies&quot;,
 </div>
 <div id="setting-up-the-sdc-problem" class="section level3">
 <h3>2. Setting up the SDC problem</h3>
-<p>We use the function <code>makeProblem</code> to create an object of class <code>sdcProblem</code> as shown below. We are making use of three arguments: <code>data</code>, which is the dataset containing the microdata; <code>dimList</code>, which is a list object containing the hierarchies that we have created, each identified using a name which matches the name of the variable as it appears in the microdata; and <code>numVarInd</code>, the name of the variable containing the numerical data that we want to aggregate.</p>
+<p>We use the function <code>makeProblem</code> to create an object of class <code>sdcProblem</code> as shown below. We are making use of three arguments:</p>
+<ul>
+<li><code>data</code>, which is the dataset containing the microdata;</li>
+<li><code>dimList</code>, which is a list object containing the hierarchies that we have created, each identified using a name which matches the name of the variable as it appears in the microdata; and</li>
+<li><code>numVarInd</code>, the name of the variable containing the numerical data that we want to aggregate.</li>
+</ul>
 <pre class="r"><code>sales_sdc_problem &lt;- makeProblem(data = company_sales_1,
                            dimList = list(County = dimCounty, Aid = dimAid),
                            numVarInd = &quot;Sales&quot;)</code></pre>
@@ -321,7 +325,7 @@ dimAid &lt;- hier_create(root = &quot;All companies&quot;,
 </div>
 <div id="primary-suppression" class="section level3">
 <h3>3. Primary suppression</h3>
-<p>Primary suppression is carried out using the function <code>primarySuppression</code>. The first argument is the sdcProblem object (<code>sales_sdc_problem</code>, in our case), and the second argument is <code>type</code>. This can take one of four values:</p>
+<p>Primary suppression is carried out using the function <code>primarySuppression</code>. The first argument is the sdcProblem object created by <code>makeProblem</code> (in out case this is <code>sales_sdc_problem</code>), and the second argument is <code>type</code>. This second argument can take one of four values:</p>
 <ul>
 <li><code>"freq"</code> for frequency rule with additional parameter <code>maxN</code> for the maximum number of entities in an unsafe cell (default value is 3)</li>
 <li><code>"nk"</code> for nk-dominance rule with additional parameters <code>n</code> and <code>k</code> (defaults of 2 and 85 respectively, meaning that in a safe cell two entities cannot contribute more than 85% of the aggregate value)</li>
@@ -337,7 +341,7 @@ dimAid &lt;- hier_create(root = &quot;All companies&quot;,
 <pre class="r"><code>getInfo(sales_sdc_problem, type=&quot;sdcStatus&quot;)</code></pre>
 <pre><code>##  [1] &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot;</code></pre>
 <pre class="r"><code>getInfo(sales_sdc_primary, type=&quot;sdcStatus&quot;)</code></pre>
-<pre><code>##  [1] &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;u&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot;</code></pre>
+<pre><code>##  [1] &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;u&quot; &quot;s&quot;</code></pre>
 </div>
 <div id="secondary-suppression" class="section level3">
 <h3>4. Secondary suppression</h3>
@@ -349,12 +353,12 @@ dimAid &lt;- hier_create(root = &quot;All companies&quot;,
 <li>“SIMPLEHEURISTIC” and “SIMPLEHEURISTIC_OLD”: heuristic procedures which might be applied to large(r) problem instances.</li>
 </ul>
 <p>There are some other arguments for parameters to these algorithms that can be varied but I have not used them. You can investigate them yourself on the <a href="https://www.rdocumentation.org/packages/sdcTable/versions/0.32.2/topics/protectTable">Help page for <code>protectTable</code></a>.</p>
+<p>Here we will use the HITAS method. The resulting object has both primary and secondary suppression applied. The next section shows how to view the results.</p>
 <pre class="r"><code>sales_sdc_secondary &lt;- protectTable(sales_sdc_primary, method = &quot;HITAS&quot;)</code></pre>
-<p>The resulting object has both primary and secondary suppression applied. The next section shows how to view the results.</p>
 </div>
 <div id="reviewing-outputs" class="section level3">
 <h3>5. Reviewing outputs</h3>
-<p>You can view the suppression results by extracting the <code>finalData</code> information from <code>sales_sdc_secondary</code> using the <code>getInfo</code> function. As you can see in the output printed below there is a new column called <code>sdcStatus</code>. It takes a value of <code>s</code> for safe cells, <code>u</code> for unsafe cells (as determined in the primary suppression), and <code>x</code> for cells that are deemed unsafe by the secondary suppression algorithm. We can see below that there is one ‘unsafe’ cell which relates to companies in Leitrim that received Aid. Since the total figure for Leitrim is also given (row 7 in the output shown) the secondary suppression of Leitrim companies that did not receive Aid is required. And since the total figure for all companies in Connaught that did and did not receive Aid is given (rows 2 and 3), suppression of one other county is also required. In this case the algorithm has chosen Sligo (rows 17 and 18).</p>
+<p>You can view the suppression results by extracting the <code>finalData</code> information from <code>sales_sdc_secondary</code> using the <code>getInfo</code> function. As you can see in the output printed below there are five columns. The first two are our two dimensions, County and Aid. Note that these are in the order that was defined when the respective hierarchies were created. Then there is <code>Freq</code> for the frequency or number of companies in each cross-tablulation. Next is <code>Sales</code>, which is the aggregate value of Sales for each cross-tabulation. Finally there is <code>sdcStatus</code> which shows the suppression status. We have already seen that it can take values of <code>s</code> for safe cells and <code>u</code> for unsafe cells, where the unsafe cells were determined by the primary suppression. Now we see a third value, <code>x</code>, for cells that are deemed unsafe by the secondary suppression algorithm. We can see below that there is one ‘unsafe’ cell which relates to companies in Leitrim that received Aid. Since the total figure for Leitrim is also given (row 7 in the output shown) secondary suppression is required for Leitrim companies that did not receive Aid. And since the total figure for all companies in Connaught that did and did not receive Aid is given (rows 2 and 3), secondary suppression of one other county in addition to Leitrim is also required. In this case the algorithm has chosen Sligo (rows 17 and 18).</p>
 <pre class="r"><code>sdc_output &lt;- getInfo(sales_sdc_secondary , type = &quot;finalData&quot;)
 
 print(sdc_output)</code></pre>
@@ -365,20 +369,164 @@ print(sdc_output)</code></pre>
 ##  4:    Galway All companies   20  9656         s
 ##  5:    Galway             Y    9  4770         s
 ##  6:    Galway             N   11  4886         s
-##  7:   Leitrim All companies    8  2658         s
-##  8:   Leitrim             Y    4  1252         u
-##  9:   Leitrim             N    4  1406         x
-## 10:      Mayo All companies   10  4738         s
-## 11:      Mayo             Y    4  2516         s
-## 12:      Mayo             N    6  2222         s
-## 13: Roscommon All companies   12  6660         s
-## 14: Roscommon             Y    5  2408         s
-## 15: Roscommon             N    7  4252         s
-## 16:     Sligo All companies   10  4991         s
-## 17:     Sligo             Y    4  2181         x
-## 18:     Sligo             N    6  2810         x</code></pre>
+##  7:      Mayo All companies   10  4738         s
+##  8:      Mayo             Y    4  2516         s
+##  9:      Mayo             N    6  2222         s
+## 10: Roscommon All companies   12  6660         s
+## 11: Roscommon             Y    5  2408         s
+## 12: Roscommon             N    7  4252         s
+## 13:     Sligo All companies   10  4991         s
+## 14:     Sligo             Y    4  2181         x
+## 15:     Sligo             N    6  2810         x
+## 16:   Leitrim All companies    8  2658         s
+## 17:   Leitrim             Y    4  1252         u
+## 18:   Leitrim             N    4  1406         x</code></pre>
 <p>The variable <code>sdcStatus</code> can also take a value <code>z</code>, and we will see later that this can come about when we override the secondary suppression to publish certain cross-tabulations.</p>
 </div>
+</div>
+<div id="multi-level-hierarchies" class="section level2">
+<h2>Multi-level hierarchies</h2>
+<p>Let’s examine a very similar situation to the first example, except now instead of having 20 companies from ‘Galway’ we have some which are from ‘Galway City’ and others which are from ‘County Galway’. The remaining counties of Mayo, Roscommon, Sligo and Leitrim are the same.</p>
+<pre class="r"><code>company_sales_2 &lt;- read_csv(&quot;input/company_sales_2.csv&quot;)
+
+head(company_sales_2, 12)</code></pre>
+<pre><code>## # A tibble: 12 x 5
+##       ID Name              County        Aid   Sales
+##    &lt;dbl&gt; &lt;chr&gt;             &lt;chr&gt;         &lt;chr&gt; &lt;dbl&gt;
+##  1     1 Jones Engineering Galway City   Y       779
+##  2     2 Mike&#39;s Bakery     Galway City   Y       825
+##  3     3 Falafel Inc       Galway City   N       342
+##  4     4 Galway Windows    Galway City   Y       563
+##  5     5 Tuam Tech Ltd     Galway City   N       328
+##  6     6 Joe Farm Supplies Galway City   N       184
+##  7     7 Smith Catering    Galway City   Y       800
+##  8     8 Lavelle Tool Hire Galway City   N       453
+##  9     9 Hyde Accontants   Galway City   N       496
+## 10    10 Nolan Metals      Galway County Y       843
+## 11    11 Thomas Meats      Galway County Y        48
+## 12    12 Duffy Wiring      Galway County N       154</code></pre>
+<p>In our output tables we want to have a subtotal line for Galway as a whole as well as the total line for Connaught. This is accomplished by creating the hierarchy ‘dimCounty’ as before (we’ll refer to Galway as ‘Galway Total’ this time), but then breaking down the node ‘Galway Total’ into two further nodes using the function <code>hier_add</code>. The function <code>hier_add</code> is very similar to <code>hier_create</code> except that it requires the name of the hierarchy being edited as its first argument. Note that ‘Galway Total’ will appear in the output table but does not appear in the microdata.</p>
+<p>You can add additional breakdowns through repeated use of <code>hier_add</code>, each time choosing an existing node to use as a root with lower nodes attached.</p>
+<pre class="r"><code>dimCounty_GalwayBreakdown &lt;- hier_create(root = &quot;Connaught&quot;,
+                         nodes = c(&quot;Galway Total&quot;,
+                                   &quot;Mayo&quot;,
+                                   &quot;Roscommon&quot;,
+                                   &quot;Sligo&quot;,
+                                   &quot;Leitrim&quot;))
+
+dimCounty_GalwayBreakdown &lt;- hier_add(dimCounty_GalwayBreakdown,
+                      root = &quot;Galway Total&quot;,
+                      nodes = c(&quot;Galway City&quot;, 
+                                &quot;Galway County&quot;))
+
+hier_display(dimCounty_GalwayBreakdown)</code></pre>
+<pre><code>## Connaught
+## +-Galway Total
+## | +-Galway City
+## | \-Galway County
+## +-Mayo
+## +-Roscommon
+## +-Sligo
+## \-Leitrim</code></pre>
+<p>Now let’s run the same suppression as before. We’ll do it in a single step this time by piping the various functions together:</p>
+<pre class="r"><code>sales_sdc_secondary &lt;- makeProblem(data = company_sales_2,
+                                   dimList = list(County = dimCounty_GalwayBreakdown, 
+                                                  Aid = dimAid),
+                                   numVarInd = &quot;Sales&quot;) %&gt;% 
+  primarySuppression(type = &quot;nk&quot; , numVarName = &quot;Sales&quot;) %&gt;% 
+  protectTable(method = &quot;HITAS&quot;)
+
+print(getInfo(sales_sdc_secondary , type = &quot;finalData&quot;))</code></pre>
+<pre><code>##            County           Aid Freq Sales sdcStatus
+##  1:     Connaught All companies   60 28703         s
+##  2:     Connaught             Y   25 13220         s
+##  3:     Connaught             N   35 15483         s
+##  4:  Galway Total All companies   20  9656         s
+##  5:  Galway Total             Y    8  4863         s
+##  6:  Galway Total             N   12  4793         s
+##  7:   Galway City All companies    9  4770         s
+##  8:   Galway City             Y    4  2967         x
+##  9:   Galway City             N    5  1803         x
+## 10: Galway County All companies   11  4886         s
+## 11: Galway County             Y    4  1896         u
+## 12: Galway County             N    7  2990         x
+## 13:          Mayo All companies   10  4738         s
+## 14:          Mayo             Y    4  2516         s
+## 15:          Mayo             N    6  2222         s
+## 16:     Roscommon All companies   12  6660         s
+## 17:     Roscommon             Y    5  2408         s
+## 18:     Roscommon             N    7  4252         s
+## 19:         Sligo All companies   10  4991         s
+## 20:         Sligo             Y    4  2181         x
+## 21:         Sligo             N    6  2810         x
+## 22:       Leitrim All companies    8  2658         s
+## 23:       Leitrim             Y    4  1252         u
+## 24:       Leitrim             N    4  1406         x
+##            County           Aid Freq Sales sdcStatus</code></pre>
+</div>
+<div id="statistics-that-are-also-hierarchical" class="section level2">
+<h2>Statistics that are also hierarchical</h2>
+<p>Let’s examine a situation where we have statistics which we want to publish, but are inter-related. In the file <code>company_data_1</code> we have ‘Sales’ ‘Input Costs’ and ‘Value Added’, where ‘Value Added’ is equal to ‘Sales’ minus ‘Input Costs’.</p>
+<pre class="r"><code>company_data_1 &lt;- read_csv(&quot;input/company_data_1.csv&quot;)
+
+head(company_data_1)</code></pre>
+<pre><code>## # A tibble: 6 x 6
+##      ID Name              County Sales `Input Costs` `Value Added`
+##   &lt;dbl&gt; &lt;chr&gt;             &lt;chr&gt;  &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;
+## 1     1 Jones Engineering Galway   779           616           163
+## 2     2 Mike&#39;s Bakery     Galway   825           348           477
+## 3     3 Falafel Inc       Galway   342           100           242
+## 4     4 Galway Windows    Galway   563           349           214
+## 5     5 Tuam Tech Ltd     Galway   328           301            27
+## 6     6 Joe Farm Supplies Galway   184           170            14</code></pre>
+<p>Because of this relationship, an unsafe cell in one statistic will require that secondary suppression be applied to at least one of the other two statistics, or else the unsafe cell would be easily calculated. We need to consider ‘Statistic’ as a dimension and create a hierarchy for it. But first we need to pivot the data into a longer format:</p>
+<pre class="r"><code>company_data_1 &lt;- company_data_1 %&gt;% 
+  pivot_longer(cols = 4:6 , names_to = &quot;Statistic&quot;)</code></pre>
+<p>Now we can make our hierarchy for Statistic. Note that ‘Sales’ is the root since it is the sum of the other two.</p>
+<pre class="r"><code>dimStatistic &lt;- hier_create(root = &quot;Sales&quot;,
+                         nodes = c(&quot;Input Costs&quot;,
+                                   &quot;Value Added&quot;))
+
+hier_display(dimStatistic)</code></pre>
+<pre><code>## Sales
+## +-Input Costs
+## \-Value Added</code></pre>
+<p>Ok, let’s use this and carry out the primary and secondary suppressions. For the County dimension we will use the same hierarchy as in the first example, <code>dimCounty</code>.</p>
+<pre class="r"><code>company_data_suppressed &lt;- makeProblem(data = company_data_1 %&gt;% 
+                                         filter(Statistic != &quot;Sales&quot;),
+                                   dimList = list(County = dimCounty, 
+                                                  Statistic = dimStatistic),
+                                   numVarInd = &quot;value&quot;) %&gt;% 
+  primarySuppression(type = &quot;nk&quot; , numVarName = &quot;value&quot;) %&gt;% 
+  protectTable(method = &quot;HITAS&quot;)
+
+print(getInfo(company_data_suppressed , type = &quot;finalData&quot;))</code></pre>
+<pre><code>##        County   Statistic Freq value sdcStatus
+##  1: Connaught       Sales  120 28899         s
+##  2: Connaught Input Costs   60 19709         s
+##  3: Connaught Value Added   60  9190         s
+##  4:    Galway       Sales   40  9656         s
+##  5:    Galway Input Costs   20  6785         s
+##  6:    Galway Value Added   20  2871         s
+##  7:      Mayo       Sales   20  4934         s
+##  8:      Mayo Input Costs   10  3020         x
+##  9:      Mayo Value Added   10  1914         u
+## 10: Roscommon       Sales   24  6660         s
+## 11: Roscommon Input Costs   12  4501         s
+## 12: Roscommon Value Added   12  2159         s
+## 13:     Sligo       Sales   20  4991         s
+## 14:     Sligo Input Costs   10  3534         s
+## 15:     Sligo Value Added   10  1457         s
+## 16:   Leitrim       Sales   16  2658         s
+## 17:   Leitrim Input Costs    8  1869         x
+## 18:   Leitrim Value Added    8   789         x</code></pre>
+</div>
+<div id="dimensions-without-a-sum" class="section level2">
+<h2>Dimensions without a sum</h2>
+<p>Sometimes we want to provide a breakdown for a dimension but we don’t want to publish a total figure. This could be the case with time series data, where we need tabular data for each day or month or year, but we don’t plan on publishing some total like ‘All years’. In principle, we could create a hierarchy for a variable like ‘Year’ with nodes representing each individual year and a root called ‘All years’, and then we could just discard the data for ‘All years’ and keep the data for the individual years. The problem with this approach is that it would lead to unnecessary secondary suppressions, because the algorithm would assume that there are more routes for calculating unsafe cells than there actually are. Instead, the data for each year needs to be suppressed separately. This could be done in a loop. As the following example shows.</p>
+</div>
+<div id="protecting-certain-cross-tabluations-from-secondary-suppression" class="section level2">
+<h2>Protecting certain cross-tabluations from secondary suppression</h2>
 </div>
 
 
