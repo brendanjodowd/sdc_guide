@@ -285,9 +285,9 @@ head(company_sales_1)</code></pre>
 </ol>
 <p>The objects created at steps 2, 3 and 4 have a class and structure which is specific to the package <code>sdcTable</code>. They may appear complex at first, but we will see how to get the necessary information out of them.</p>
 <p>Later sections will show more complex cases which will be presented as variations of this simple example.</p>
-<div id="creating-hierachies" class="section level3">
-<h3>1. Creating hierachies</h3>
-<p>We will create a hierarchy for each of our two dimensions called <code>dimCounty</code> and <code>dimAid</code>. This is done using the <code>hier_create</code> function from the <code>sdcTable</code> package as shown below. The total category is identified as the ‘root’ of the hierarchy. Note that this total name/classification does not exist in the microdata. The underlying classifications are then created using the <code>nodes</code> argument to the function. There are other ways of creating hierarchies, either as a matrix or by creating them in a csv and importing that, which could be useful if you have a hierarchy with a large number of classifications.</p>
+<div id="defining-hierachies" class="section level3">
+<h3>1. Defining hierachies</h3>
+<p>We need to define a hierarchy for each of our two dimensions <code>County</code> and <code>Aid</code> which we shall call <code>dimCounty</code> and <code>dimAid</code>. These are created using the <code>hier_create</code> function from the <code>sdcTable</code> package as shown below. The total category is identified as the ‘root’ of the hierarchy. Note that this total name/classification does not exist in the microdata. The underlying classifications are then created using the <code>nodes</code> argument to the function. There are other ways of creating hierarchies, either as a matrix or by creating them in a csv and importing that, which could be useful if you have a hierarchy with a large number of classifications.</p>
 <pre class="r"><code>dimCounty &lt;- hier_create(root = &quot;Connaught&quot;,
                          nodes = c(&quot;Galway&quot;,
                                    &quot;Leitrim&quot;,
@@ -333,14 +333,14 @@ dimAid &lt;- hier_create(root = &quot;All companies&quot;,
 <pre class="r"><code>sales_sdc_primary &lt;- primarySuppression(sales_sdc_problem, 
                                         type = &quot;nk&quot;, 
                                         numVarName = &quot;Sales&quot;)</code></pre>
-<p>The output from this function, which we have called <code>sales_sdc_primary</code>, is of the same class ‘sdcProblem’ as the input object <code>sales_sdc_problem</code>. However the primary suppression rule has been implemented which we can see if we look at the slot called ‘sdcStatus’. We can use the function <code>getInfo</code> to do this. This function is part of the sdcTable package, and it allows us to query the objects that are made through the suppression process. Here we see that in <code>sales_sdc_problem</code> there are 18 cells marked ‘s’ for ‘safe’, but in <code>sales_sdc_primary</code> which has had primary suppression applied, there is one cell marked ‘u’ for ’unsafe.</p>
+<p>The output from this function, which we have called <code>sales_sdc_primary</code>, is of the same class ‘sdcProblem’ as the input object <code>sales_sdc_problem</code>. However the primary suppression rule has been implemented which we can see if we look at the slot called ‘sdcStatus’. We can use the function <code>getInfo</code> to do this. This function is part of the sdcTable package, and it allows us to query the objects that are made through the suppression process. Here we see that in <code>sales_sdc_problem</code> there are 18 cells marked ‘s’ for ‘safe’, but in <code>sales_sdc_primary</code> which has had primary suppression applied, there is one cell marked ‘u’ for ‘unsafe’.</p>
 <pre class="r"><code>getInfo(sales_sdc_problem, type=&quot;sdcStatus&quot;)</code></pre>
 <pre><code>##  [1] &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot;</code></pre>
 <pre class="r"><code>getInfo(sales_sdc_primary, type=&quot;sdcStatus&quot;)</code></pre>
 <pre><code>##  [1] &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;u&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot; &quot;s&quot;</code></pre>
 </div>
-<div id="secondary-suppresion" class="section level3">
-<h3>4. Secondary suppresion</h3>
+<div id="secondary-suppression" class="section level3">
+<h3>4. Secondary suppression</h3>
 <p>Secondary suppression is carried out using the function <code>protectTable</code> which has two main arguments. The first argument is the sdcProblem object to which primary suppression has already been applied (<code>sales_sdc_primary</code> in our case). The second main argument is <code>method</code> which allows us to choose an algorithm for secondary suppression. There are four options, and here I am copying the descriptions from the <a href="https://www.rdocumentation.org/packages/sdcTable/versions/0.32.2/topics/protectTable">Help page for this function</a>:</p>
 <ul>
 <li>“OPT”: protect the complete problem at once using a cut and branch algorithm. The optimal algorithm should be used for small problem-instances only.</li>
@@ -350,6 +350,34 @@ dimAid &lt;- hier_create(root = &quot;All companies&quot;,
 </ul>
 <p>There are some other arguments for parameters to these algorithms that can be varied but I have not used them. You can investigate them yourself on the <a href="https://www.rdocumentation.org/packages/sdcTable/versions/0.32.2/topics/protectTable">Help page for <code>protectTable</code></a>.</p>
 <pre class="r"><code>sales_sdc_secondary &lt;- protectTable(sales_sdc_primary, method = &quot;HITAS&quot;)</code></pre>
+<p>The resulting object has both primary and secondary suppression applied. The next section shows how to view the results.</p>
+</div>
+<div id="reviewing-outputs" class="section level3">
+<h3>5. Reviewing outputs</h3>
+<p>You can view the suppression results by extracting the <code>finalData</code> information from <code>sales_sdc_secondary</code> using the <code>getInfo</code> function. As you can see in the output printed below there is a new column called <code>sdcStatus</code>. It takes a value of <code>s</code> for safe cells, <code>u</code> for unsafe cells (as determined in the primary suppression), and <code>x</code> for cells that are deemed unsafe by the secondary suppression algorithm. We can see below that there is one ‘unsafe’ cell which relates to companies in Leitrim that received Aid. Since the total figure for Leitrim is also given (row 7 in the output shown) the secondary suppression of Leitrim companies that did not receive Aid is required. And since the total figure for all companies in Connaught that did and did not receive Aid is given (rows 2 and 3), suppression of one other county is also required. In this case the algorithm has chosen Sligo (rows 17 and 18).</p>
+<pre class="r"><code>sdc_output &lt;- getInfo(sales_sdc_secondary , type = &quot;finalData&quot;)
+
+print(sdc_output)</code></pre>
+<pre><code>##        County           Aid Freq Sales sdcStatus
+##  1: Connaught All companies   60 28703         s
+##  2: Connaught             Y   26 13127         s
+##  3: Connaught             N   34 15576         s
+##  4:    Galway All companies   20  9656         s
+##  5:    Galway             Y    9  4770         s
+##  6:    Galway             N   11  4886         s
+##  7:   Leitrim All companies    8  2658         s
+##  8:   Leitrim             Y    4  1252         u
+##  9:   Leitrim             N    4  1406         x
+## 10:      Mayo All companies   10  4738         s
+## 11:      Mayo             Y    4  2516         s
+## 12:      Mayo             N    6  2222         s
+## 13: Roscommon All companies   12  6660         s
+## 14: Roscommon             Y    5  2408         s
+## 15: Roscommon             N    7  4252         s
+## 16:     Sligo All companies   10  4991         s
+## 17:     Sligo             Y    4  2181         x
+## 18:     Sligo             N    6  2810         x</code></pre>
+<p>The variable <code>sdcStatus</code> can also take a value <code>z</code>, and we will see later that this can come about when we override the secondary suppression to publish certain cross-tabulations.</p>
 </div>
 </div>
 

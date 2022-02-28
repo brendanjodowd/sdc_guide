@@ -54,9 +54,9 @@ The objects created at steps 2, 3 and 4 have a class and structure which is spec
 
 Later sections will show more complex cases which will be presented as variations of this simple example. 
 
-### 1. Creating hierachies
+### 1. Defining hierachies
 
-We will create a hierarchy for each of our two dimensions called `dimCounty` and `dimAid`. This is done using the `hier_create` function from the `sdcTable` package as shown below. The total category is identified as the 'root' of the hierarchy. Note that this total name/classification does not exist in the microdata. The underlying classifications are then created using the `nodes` argument to the function. There are other ways of creating hierarchies, either as a matrix or by creating them in a csv and importing that, which could be useful if you have a hierarchy with a large number of classifications. 
+We need to define a hierarchy for each of our two dimensions `County` and `Aid` which we shall call `dimCounty` and `dimAid`. These are created using the `hier_create` function from the `sdcTable` package as shown below. The total category is identified as the 'root' of the hierarchy. Note that this total name/classification does not exist in the microdata. The underlying classifications are then created using the `nodes` argument to the function. There are other ways of creating hierarchies, either as a matrix or by creating them in a csv and importing that, which could be useful if you have a hierarchy with a large number of classifications. 
 
 ```{r hier_1 , message=FALSE, warning=FALSE}
 dimCounty <- hier_create(root = "Connaught",
@@ -108,14 +108,14 @@ sales_sdc_primary <- primarySuppression(sales_sdc_problem,
                                         numVarName = "Sales")
 ```
 
-The output from this function, which we have called `sales_sdc_primary`, is of the same class 'sdcProblem' as the input object `sales_sdc_problem`. However the primary suppression rule has been implemented which we can see if we look at the slot called 'sdcStatus'. We can use the function `getInfo` to do this. This function is part of the sdcTable package, and it allows us to query the objects that are made through the suppression process. Here we see that in `sales_sdc_problem` there are 18 cells marked 's' for 'safe', but in `sales_sdc_primary` which has had primary suppression applied, there is one cell marked 'u' for 'unsafe. 
+The output from this function, which we have called `sales_sdc_primary`, is of the same class 'sdcProblem' as the input object `sales_sdc_problem`. However the primary suppression rule has been implemented which we can see if we look at the slot called 'sdcStatus'. We can use the function `getInfo` to do this. This function is part of the sdcTable package, and it allows us to query the objects that are made through the suppression process. Here we see that in `sales_sdc_problem` there are 18 cells marked 's' for 'safe', but in `sales_sdc_primary` which has had primary suppression applied, there is one cell marked 'u' for 'unsafe'. 
 
 ```{r getInfo_1 , message=FALSE, warning=FALSE}
 getInfo(sales_sdc_problem, type="sdcStatus")
 getInfo(sales_sdc_primary, type="sdcStatus")
 ```
 
-### 4. Secondary suppresion
+### 4. Secondary suppression
 
 Secondary suppression is carried out using the function `protectTable` which has two main arguments. The first argument is the sdcProblem object to which primary suppression has already been applied (`sales_sdc_primary` in our case). The second main argument is `method` which allows us to choose an algorithm for secondary suppression. There are four options, and here I am copying the descriptions from the [Help page for this function](https://www.rdocumentation.org/packages/sdcTable/versions/0.32.2/topics/protectTable):
 
@@ -130,3 +130,17 @@ There are some other arguments for parameters to these algorithms that can be va
 ```{r sec_1 , message=FALSE, warning=FALSE}
 sales_sdc_secondary <- protectTable(sales_sdc_primary, method = "HITAS")
 ```
+
+The resulting object has both primary and secondary suppression applied. The next section shows how to view the results. 
+
+### 5. Reviewing outputs
+
+You can view the suppression results by extracting the `finalData` information from `sales_sdc_secondary` using the `getInfo` function. As you can see in the output printed below there is a new column called `sdcStatus`. It takes a value of `s` for safe cells, `u` for unsafe cells (as determined in the primary suppression), and `x` for cells that are deemed unsafe by the secondary suppression algorithm. We can see below that there is one 'unsafe' cell which relates to companies in Leitrim that received Aid. Since the total figure for Leitrim is also given (row 7 in the output shown) the secondary suppression of Leitrim companies that did not receive Aid is required. And since the total figure for all companies in Connaught that did and did not receive Aid is given (rows 2 and 3), suppression of one other county is also required. In this case the algorithm has chosen Sligo (rows 17 and 18).
+
+```{r getInfo_final , message=FALSE, warning=FALSE}
+sdc_output <- getInfo(sales_sdc_secondary , type = "finalData")
+
+print(sdc_output)
+```
+
+The variable `sdcStatus` can also take a value `z`, and we will see later that this can come about when we override the secondary suppression to publish certain cross-tabulations.  
