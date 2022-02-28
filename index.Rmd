@@ -238,5 +238,41 @@ print(getInfo(company_data_suppressed , type = "finalData"))
 
 Sometimes we want to provide a breakdown for a dimension but we don't want to publish a total figure. This could be the case with time series data, where we need tabular data for each day or month or year, but we don't plan on publishing some total like 'All years'. In principle, we could create a hierarchy for a variable like 'Year' with nodes representing each individual year and a root called 'All years', and then we could just discard the data for 'All years' and keep the data for the individual years. The problem with this approach is that it would lead to unnecessary secondary suppressions, because the algorithm would assume that there are more routes for calculating unsafe cells than there actually are. Instead, the data for each year needs to be suppressed separately. This could be done in a loop. As the following example shows. 
 
+Let's look at `company_sales_3` which includes sales data for 60 companies across five years from 2010 to 2014. 
+
+```{r import_4 , message=FALSE, warning=FALSE}
+company_data_3 <- read_csv("input/company_sales_3.csv")
+
+head(company_data_3)
+```
+
+We want to create tabular data with dimensions of County and Year, but with totals for County only. The way I would do this is to use a hierarchy for County (`dimCounty` as defined earlier) and loop over Year. As we loop over the years we can store all the suppression data in a list. So we start by making an empty list, which we call `suppression_list`. The suppression data that I am storing is the `"finalData"` output from the `getInfo` function. Before I store it in the list I need to add the Year using the `mutate` function because it is lost through the suppression process. At the very end the list is converted into a single dataframe called `suppressed_data` using the function `bind_rows`. 
+
+```{r years_loop , message=FALSE, warning=FALSE}
+suppression_list <- list() # make an empty list to store the suppression data
+years_vector = 2010:2014 # create a vector of the years
+number_of_years = length(years_vector) # this is just equal to 5
+
+for (i in 1:number_of_years){ # loop over the years
+  temp_microdata <- company_data_3 %>% 
+    filter(Year == years_vector[i]) # filter out the data for this year
+  
+  suppression_list[[i]] <- temp_microdata %>% # carry out an "nk" type suppression
+    makeProblem(dimList = list(County = dimCounty), numVarInd = "value") %>% 
+    primarySuppression(type = "nk" , numVarName = "value") %>% 
+    protectTable(method = "HITAS") %>% 
+    getInfo(type = "finalData") %>% # extract the final data
+    mutate(Year = years_vector[i]) # create the variable Year again
+  
+}
+
+# convert the list into a single dataframe
+suppressed_data <- suppression_list %>% bind_rows() 
+
+head(suppressed_data)
+
+```
+
+Note that I am looping over 1-5 rather than 2010-2014 so that I can use the index of the loop as the index of the list that I am creating (`suppression_list`). 
 
 ## Protecting certain cross-tabluations from secondary suppression

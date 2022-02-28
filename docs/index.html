@@ -524,6 +524,49 @@ print(getInfo(company_data_suppressed , type = &quot;finalData&quot;))</code></p
 <div id="dimensions-without-a-sum" class="section level2">
 <h2>Dimensions without a sum</h2>
 <p>Sometimes we want to provide a breakdown for a dimension but we don’t want to publish a total figure. This could be the case with time series data, where we need tabular data for each day or month or year, but we don’t plan on publishing some total like ‘All years’. In principle, we could create a hierarchy for a variable like ‘Year’ with nodes representing each individual year and a root called ‘All years’, and then we could just discard the data for ‘All years’ and keep the data for the individual years. The problem with this approach is that it would lead to unnecessary secondary suppressions, because the algorithm would assume that there are more routes for calculating unsafe cells than there actually are. Instead, the data for each year needs to be suppressed separately. This could be done in a loop. As the following example shows.</p>
+<p>Let’s look at <code>company_sales_3</code> which includes sales data for 60 companies across five years from 2010 to 2014.</p>
+<pre class="r"><code>company_data_3 &lt;- read_csv(&quot;input/company_sales_3.csv&quot;)
+
+head(company_data_3)</code></pre>
+<pre><code>## # A tibble: 6 x 5
+##      ID Name              County  Year value
+##   &lt;dbl&gt; &lt;chr&gt;             &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt;
+## 1     1 Jones Engineering Galway  2010   779
+## 2     2 Mike&#39;s Bakery     Galway  2010   825
+## 3     3 Falafel Inc       Galway  2010   342
+## 4     4 Galway Windows    Galway  2010   563
+## 5     5 Tuam Tech Ltd     Galway  2010   328
+## 6     6 Joe Farm Supplies Galway  2010   184</code></pre>
+<p>We want to create tabular data with dimensions of County and Year, but with totals for County only. The way I would do this is to use a hierarchy for County (<code>dimCounty</code> as defined earlier) and loop over Year. As we loop over the years we can store all the suppression data in a list. So we start by making an empty list, which we call <code>suppression_list</code>. The suppression data that I am storing is the <code>"finalData"</code> output from the <code>getInfo</code> function. Before I store it in the list I need to add the Year using the <code>mutate</code> function because it is lost through the suppression process. At the very end the list is converted into a single dataframe called <code>suppressed_data</code> using the function <code>bind_rows</code>.</p>
+<pre class="r"><code>suppression_list &lt;- list() # make an empty list to store the suppression data
+years_vector = 2010:2014 # create a vector of the years
+number_of_years = length(years_vector) # this is just equal to 5
+
+for (i in 1:number_of_years){ # loop over the years
+  temp_microdata &lt;- company_data_3 %&gt;% 
+    filter(Year == years_vector[i]) # filter out the data for this year
+  
+  suppression_list[[i]] &lt;- temp_microdata %&gt;% # carry out an &quot;nk&quot; type suppression
+    makeProblem(dimList = list(County = dimCounty), numVarInd = &quot;value&quot;) %&gt;% 
+    primarySuppression(type = &quot;nk&quot; , numVarName = &quot;value&quot;) %&gt;% 
+    protectTable(method = &quot;HITAS&quot;) %&gt;% 
+    getInfo(type = &quot;finalData&quot;) %&gt;% # extract the final data
+    mutate(Year = years_vector[i]) # create the variable Year again
+  
+}
+
+# convert the list into a single dataframe
+suppressed_data &lt;- suppression_list %&gt;% bind_rows() 
+
+head(suppressed_data)</code></pre>
+<pre><code>##       County Freq value sdcStatus Year
+## 1: Connaught   60 24938         s 2010
+## 2:    Galway   20  9656         s 2010
+## 3:      Mayo   10  4738         s 2010
+## 4: Roscommon   12  2895         u 2010
+## 5:     Sligo   10  4991         s 2010
+## 6:   Leitrim    8  2658         x 2010</code></pre>
+<p>Note that I am looping over 1-5 rather than 2010-2014 so that I can use the index of the loop as the index of the list that I am creating (<code>suppression_list</code>).</p>
 </div>
 <div id="protecting-certain-cross-tabluations-from-secondary-suppression" class="section level2">
 <h2>Protecting certain cross-tabluations from secondary suppression</h2>

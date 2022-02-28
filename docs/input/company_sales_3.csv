@@ -1,0 +1,301 @@
+ID,Name,County,Year,value
+1,Jones Engineering,Galway,2010,779
+2,Mike's Bakery,Galway,2010,825
+3,Falafel Inc,Galway,2010,342
+4,Galway Windows,Galway,2010,563
+5,Tuam Tech Ltd,Galway,2010,328
+6,Joe Farm Supplies,Galway,2010,184
+7,Smith Catering,Galway,2010,800
+8,Lavelle Tool Hire,Galway,2010,453
+9,Hyde Accontants,Galway,2010,496
+10,Nolan Metals,Galway,2010,843
+11,Thomas Meats,Galway,2010,48
+12,Duffy Wiring,Galway,2010,154
+13,Ryan Publishing,Galway,2010,999
+14,Connor Software,Galway,2010,355
+15,O'Malley Bookkeeping,Galway,2010,126
+16,Moycullen Fire Safety,Galway,2010,442
+17,Ballinasloe Sports Centre,Galway,2010,860
+18,Spiddal Crane Hire,Galway,2010,509
+19,Loughrea Fuels,Galway,2010,6
+20,Lakeside Hotel,Galway,2010,544
+21,Belmullet Fisheries,Mayo,2010,30
+22,Ballycastle Fertilisers,Mayo,2010,782
+23,Shane's Wallpaper,Mayo,2010,799
+24,Nephin Tours Ltd,Mayo,2010,905
+25,Achill Meat Processing,Mayo,2010,682
+26,Castlebar Hotel,Mayo,2010,100
+27,Foxford Dairy,Mayo,2010,102
+28,Thompson Footwear,Mayo,2010,215
+29,Sweeney Undertakers,Mayo,2010,373
+30,Newport Wines,Mayo,2010,750
+31,Leitrim Whiskey Company,Leitrim,2010,232
+32,Mohill Auto Sales,Leitrim,2010,905
+33,McDonnell Air Conditioning,Leitrim,2010,31
+34,Dunleavy Civil Engineering,Leitrim,2010,84
+35,N16 Service Station,Leitrim,2010,258
+36,Ballinamore Glazing,Leitrim,2010,353
+37,Casey Stationery,Leitrim,2010,0
+38,Fitzpatrick Counselling,Leitrim,2010,795
+39,Frenchpark Properties,Roscommon,2010,27
+40,Strokestown Taxi Company,Roscommon,2010,45
+41,Roscommon Timber,Roscommon,2010,27
+42,Foley Seafood,Roscommon,2010,34
+43,Blake Electronics,Roscommon,2010,30
+44,Murphy Freight,Roscommon,2010,50
+45,Castlerea Couriers,Roscommon,2010,43
+46,Donovan Event Management,Roscommon,2010,26
+47,Regan Bar Supplies,Roscommon,2010,57
+48,Kenny Programming,Roscommon,2010,1084
+49,Griffin Insurance,Roscommon,2010,64
+50,Boyle Paints,Roscommon,2010,1408
+51,Whelan Surf School,Sligo,2010,872
+52,Buckley Consultants,Sligo,2010,288
+53,Burton Design,Sligo,2010,507
+54,Ballymote Landscaping,Sligo,2010,514
+55,Flynn Orthopedics,Sligo,2010,69
+56,Easky Childcare,Sligo,2010,532
+57,Maguire Poultry,Sligo,2010,394
+58,Collins General Store,Sligo,2010,826
+59,Tobercurry Dressmaking,Sligo,2010,695
+60,Enniscrone Mining,Sligo,2010,294
+1,Jones Engineering,Galway,2011,753
+2,Mike's Bakery,Galway,2011,826
+3,Falafel Inc,Galway,2011,335
+4,Galway Windows,Galway,2011,570
+5,Tuam Tech Ltd,Galway,2011,372
+6,Joe Farm Supplies,Galway,2011,157
+7,Smith Catering,Galway,2011,765
+8,Lavelle Tool Hire,Galway,2011,503
+9,Hyde Accontants,Galway,2011,528
+10,Nolan Metals,Galway,2011,871
+11,Thomas Meats,Galway,2011,72
+12,Duffy Wiring,Galway,2011,179
+13,Ryan Publishing,Galway,2011,1032
+14,Connor Software,Galway,2011,322
+15,O'Malley Bookkeeping,Galway,2011,144
+16,Moycullen Fire Safety,Galway,2011,434
+17,Ballinasloe Sports Centre,Galway,2011,842
+18,Spiddal Crane Hire,Galway,2011,555
+19,Loughrea Fuels,Galway,2011,13
+20,Lakeside Hotel,Galway,2011,592
+21,Belmullet Fisheries,Mayo,2011,66
+22,Ballycastle Fertilisers,Mayo,2011,822
+23,Shane's Wallpaper,Mayo,2011,829
+24,Nephin Tours Ltd,Mayo,2011,955
+25,Achill Meat Processing,Mayo,2011,635
+26,Castlebar Hotel,Mayo,2011,51
+27,Foxford Dairy,Mayo,2011,91
+28,Thompson Footwear,Mayo,2011,182
+29,Sweeney Undertakers,Mayo,2011,392
+30,Newport Wines,Mayo,2011,713
+31,Leitrim Whiskey Company,Leitrim,2011,183
+32,Mohill Auto Sales,Leitrim,2011,928
+33,McDonnell Air Conditioning,Leitrim,2011,38
+34,Dunleavy Civil Engineering,Leitrim,2011,93
+35,N16 Service Station,Leitrim,2011,268
+36,Ballinamore Glazing,Leitrim,2011,351
+37,Casey Stationery,Leitrim,2011,36
+38,Fitzpatrick Counselling,Leitrim,2011,795
+39,Frenchpark Properties,Roscommon,2011,319
+40,Strokestown Taxi Company,Roscommon,2011,375
+41,Roscommon Timber,Roscommon,2011,311
+42,Foley Seafood,Roscommon,2011,528
+43,Blake Electronics,Roscommon,2011,1006
+44,Murphy Freight,Roscommon,2011,686
+45,Castlerea Couriers,Roscommon,2011,860
+46,Donovan Event Management,Roscommon,2011,212
+47,Regan Bar Supplies,Roscommon,2011,51
+48,Kenny Programming,Roscommon,2011,935
+49,Griffin Insurance,Roscommon,2011,637
+50,Boyle Paints,Roscommon,2011,798
+51,Whelan Surf School,Sligo,2011,854
+52,Buckley Consultants,Sligo,2011,261
+53,Burton Design,Sligo,2011,468
+54,Ballymote Landscaping,Sligo,2011,564
+55,Flynn Orthopedics,Sligo,2011,117
+56,Easky Childcare,Sligo,2011,573
+57,Maguire Poultry,Sligo,2011,365
+58,Collins General Store,Sligo,2011,859
+59,Tobercurry Dressmaking,Sligo,2011,730
+60,Enniscrone Mining,Sligo,2011,272
+1,Jones Engineering,Galway,2012,765
+2,Mike's Bakery,Galway,2012,841
+3,Falafel Inc,Galway,2012,323
+4,Galway Windows,Galway,2012,545
+5,Tuam Tech Ltd,Galway,2012,386
+6,Joe Farm Supplies,Galway,2012,109
+7,Smith Catering,Galway,2012,811
+8,Lavelle Tool Hire,Galway,2012,546
+9,Hyde Accontants,Galway,2012,509
+10,Nolan Metals,Galway,2012,846
+11,Thomas Meats,Galway,2012,105
+12,Duffy Wiring,Galway,2012,197
+13,Ryan Publishing,Galway,2012,1059
+14,Connor Software,Galway,2012,351
+15,O'Malley Bookkeeping,Galway,2012,114
+16,Moycullen Fire Safety,Galway,2012,396
+17,Ballinasloe Sports Centre,Galway,2012,834
+18,Spiddal Crane Hire,Galway,2012,545
+19,Loughrea Fuels,Galway,2012,9
+20,Lakeside Hotel,Galway,2012,579
+21,Belmullet Fisheries,Mayo,2012,37
+22,Ballycastle Fertilisers,Mayo,2012,785
+23,Shane's Wallpaper,Mayo,2012,801
+24,Nephin Tours Ltd,Mayo,2012,932
+25,Achill Meat Processing,Mayo,2012,589
+26,Castlebar Hotel,Mayo,2012,29
+27,Foxford Dairy,Mayo,2012,89
+28,Thompson Footwear,Mayo,2012,157
+29,Sweeney Undertakers,Mayo,2012,391
+30,Newport Wines,Mayo,2012,737
+31,Leitrim Whiskey Company,Leitrim,2012,152
+32,Mohill Auto Sales,Leitrim,2012,924
+33,McDonnell Air Conditioning,Leitrim,2012,61
+34,Dunleavy Civil Engineering,Leitrim,2012,69
+35,N16 Service Station,Leitrim,2012,259
+36,Ballinamore Glazing,Leitrim,2012,356
+37,Casey Stationery,Leitrim,2012,50
+38,Fitzpatrick Counselling,Leitrim,2012,806
+39,Frenchpark Properties,Roscommon,2012,313
+40,Strokestown Taxi Company,Roscommon,2012,332
+41,Roscommon Timber,Roscommon,2012,308
+42,Foley Seafood,Roscommon,2012,489
+43,Blake Electronics,Roscommon,2012,1002
+44,Murphy Freight,Roscommon,2012,639
+45,Castlerea Couriers,Roscommon,2012,900
+46,Donovan Event Management,Roscommon,2012,207
+47,Regan Bar Supplies,Roscommon,2012,71
+48,Kenny Programming,Roscommon,2012,936
+49,Griffin Insurance,Roscommon,2012,660
+50,Boyle Paints,Roscommon,2012,758
+51,Whelan Surf School,Sligo,2012,858
+52,Buckley Consultants,Sligo,2012,245
+53,Burton Design,Sligo,2012,453
+54,Ballymote Landscaping,Sligo,2012,538
+55,Flynn Orthopedics,Sligo,2012,162
+56,Easky Childcare,Sligo,2012,610
+57,Maguire Poultry,Sligo,2012,399
+58,Collins General Store,Sligo,2012,819
+59,Tobercurry Dressmaking,Sligo,2012,684
+60,Enniscrone Mining,Sligo,2012,226
+1,Jones Engineering,Galway,2013,764
+2,Mike's Bakery,Galway,2013,860
+3,Falafel Inc,Galway,2013,284
+4,Galway Windows,Galway,2013,517
+5,Tuam Tech Ltd,Galway,2013,350
+6,Joe Farm Supplies,Galway,2013,102
+7,Smith Catering,Galway,2013,834
+8,Lavelle Tool Hire,Galway,2013,530
+9,Hyde Accontants,Galway,2013,536
+10,Nolan Metals,Galway,2013,874
+11,Thomas Meats,Galway,2013,119
+12,Duffy Wiring,Galway,2013,238
+13,Ryan Publishing,Galway,2013,1033
+14,Connor Software,Galway,2013,378
+15,O'Malley Bookkeeping,Galway,2013,67
+16,Moycullen Fire Safety,Galway,2013,364
+17,Ballinasloe Sports Centre,Galway,2013,806
+18,Spiddal Crane Hire,Galway,2013,555
+19,Loughrea Fuels,Galway,2013,10
+20,Lakeside Hotel,Galway,2013,627
+21,Belmullet Fisheries,Mayo,2013,12
+22,Ballycastle Fertilisers,Mayo,2013,802
+23,Shane's Wallpaper,Mayo,2013,834
+24,Nephin Tours Ltd,Mayo,2013,883
+25,Achill Meat Processing,Mayo,2013,607
+26,Castlebar Hotel,Mayo,2013,63
+27,Foxford Dairy,Mayo,2013,46
+28,Thompson Footwear,Mayo,2013,135
+29,Sweeney Undertakers,Mayo,2013,348
+30,Newport Wines,Mayo,2013,714
+31,Leitrim Whiskey Company,Leitrim,2013,38
+32,Mohill Auto Sales,Leitrim,2013,957
+33,McDonnell Air Conditioning,Leitrim,2013,49
+34,Dunleavy Civil Engineering,Leitrim,2013,69
+35,N16 Service Station,Leitrim,2013,55
+36,Ballinamore Glazing,Leitrim,2013,52
+37,Casey Stationery,Leitrim,2013,30
+38,Fitzpatrick Counselling,Leitrim,2013,820
+39,Frenchpark Properties,Roscommon,2013,281
+40,Strokestown Taxi Company,Roscommon,2013,350
+41,Roscommon Timber,Roscommon,2013,317
+42,Foley Seafood,Roscommon,2013,469
+43,Blake Electronics,Roscommon,2013,955
+44,Murphy Freight,Roscommon,2013,666
+45,Castlerea Couriers,Roscommon,2013,878
+46,Donovan Event Management,Roscommon,2013,172
+47,Regan Bar Supplies,Roscommon,2013,114
+48,Kenny Programming,Roscommon,2013,935
+49,Griffin Insurance,Roscommon,2013,701
+50,Boyle Paints,Roscommon,2013,709
+51,Whelan Surf School,Sligo,2013,813
+52,Buckley Consultants,Sligo,2013,249
+53,Burton Design,Sligo,2013,486
+54,Ballymote Landscaping,Sligo,2013,491
+55,Flynn Orthopedics,Sligo,2013,123
+56,Easky Childcare,Sligo,2013,629
+57,Maguire Poultry,Sligo,2013,422
+58,Collins General Store,Sligo,2013,816
+59,Tobercurry Dressmaking,Sligo,2013,713
+60,Enniscrone Mining,Sligo,2013,217
+1,Jones Engineering,Galway,2014,729
+2,Mike's Bakery,Galway,2014,811
+3,Falafel Inc,Galway,2014,246
+4,Galway Windows,Galway,2014,492
+5,Tuam Tech Ltd,Galway,2014,349
+6,Joe Farm Supplies,Galway,2014,149
+7,Smith Catering,Galway,2014,820
+8,Lavelle Tool Hire,Galway,2014,566
+9,Hyde Accontants,Galway,2014,498
+10,Nolan Metals,Galway,2014,904
+11,Thomas Meats,Galway,2014,76
+12,Duffy Wiring,Galway,2014,201
+13,Ryan Publishing,Galway,2014,1081
+14,Connor Software,Galway,2014,377
+15,O'Malley Bookkeeping,Galway,2014,41
+16,Moycullen Fire Safety,Galway,2014,396
+17,Ballinasloe Sports Centre,Galway,2014,817
+18,Spiddal Crane Hire,Galway,2014,585
+19,Loughrea Fuels,Galway,2014,9
+20,Lakeside Hotel,Galway,2014,642
+21,Belmullet Fisheries,Mayo,2014,41
+22,Ballycastle Fertilisers,Mayo,2014,783
+23,Shane's Wallpaper,Mayo,2014,813
+24,Nephin Tours Ltd,Mayo,2014,931
+25,Achill Meat Processing,Mayo,2014,629
+26,Castlebar Hotel,Mayo,2014,39
+27,Foxford Dairy,Mayo,2014,58
+28,Thompson Footwear,Mayo,2014,161
+29,Sweeney Undertakers,Mayo,2014,370
+30,Newport Wines,Mayo,2014,757
+31,Leitrim Whiskey Company,Leitrim,2014,179
+32,Mohill Auto Sales,Leitrim,2014,879
+33,McDonnell Air Conditioning,Leitrim,2014,21
+34,Dunleavy Civil Engineering,Leitrim,2014,102
+35,N16 Service Station,Leitrim,2014,337
+36,Ballinamore Glazing,Leitrim,2014,404
+37,Casey Stationery,Leitrim,2014,141
+38,Fitzpatrick Counselling,Leitrim,2014,753
+39,Frenchpark Properties,Roscommon,2014,288
+40,Strokestown Taxi Company,Roscommon,2014,364
+41,Roscommon Timber,Roscommon,2014,285
+42,Foley Seafood,Roscommon,2014,423
+43,Blake Electronics,Roscommon,2014,939
+44,Murphy Freight,Roscommon,2014,633
+45,Castlerea Couriers,Roscommon,2014,861
+46,Donovan Event Management,Roscommon,2014,184
+47,Regan Bar Supplies,Roscommon,2014,81
+48,Kenny Programming,Roscommon,2014,922
+49,Griffin Insurance,Roscommon,2014,711
+50,Boyle Paints,Roscommon,2014,701
+51,Whelan Surf School,Sligo,2014,845
+52,Buckley Consultants,Sligo,2014,235
+53,Burton Design,Sligo,2014,515
+54,Ballymote Landscaping,Sligo,2014,534
+55,Flynn Orthopedics,Sligo,2014,121
+56,Easky Childcare,Sligo,2014,659
+57,Maguire Poultry,Sligo,2014,401
+58,Collins General Store,Sligo,2014,860
+59,Tobercurry Dressmaking,Sligo,2014,702
+60,Enniscrone Mining,Sligo,2014,265
