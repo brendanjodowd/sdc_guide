@@ -138,7 +138,7 @@ sales_sdc_secondary <- protectTable(sales_sdc_primary, method = "HITAS")
 
 ### 5. Reviewing outputs
 
-You can view the suppression results by extracting the `finalData` information from `sales_sdc_secondary` using the `getInfo` function. As you can see in the output printed below there are five columns. The first two are our two dimensions, County and Aid. Note that these are in the order that was defined when the respective hierarchies were created. Then there is `Freq` for the frequency or number of companies in each cross-tablulation. Next is `Sales`, which is the aggregate value of Sales for each cross-tabulation. Finally there is `sdcStatus` which shows the suppression status. We have already seen that it can take values of `s` for safe cells and `u` for unsafe cells, where the unsafe cells were determined by the primary suppression. Now we see a third value, `x`, for cells that are deemed unsafe by the secondary suppression algorithm. We can see below that there is one 'unsafe' cell which relates to companies in Leitrim that received Aid. Since the total figure for Leitrim is also given (row 7 in the output shown) secondary suppression is required for Leitrim companies that did not receive Aid. And since the total figure for all companies in Connaught that did and did not receive Aid is given (rows 2 and 3), secondary suppression of one other county in addition to Leitrim is also required. In this case the algorithm has chosen Sligo (rows 17 and 18).
+You can view the suppression results by extracting the `finalData` information from `sales_sdc_secondary` using the `getInfo` function. As you can see in the output printed below there are five columns. The first two are our two dimensions, County and Aid. Note that these are in the order that was defined when the respective hierarchies were created. Then there is `Freq` for the frequency or number of companies in each cross-tablulation. Next is `Sales`, which is the aggregate value of Sales for each cross-tabulation. Finally there is `sdcStatus` which shows the suppression status. We have already seen that it can take values of `s` for safe cells and `u` for unsafe cells, where the unsafe cells were determined by the primary suppression. Now we see a third value, `x`, for cells that are deemed unsafe by the secondary suppression algorithm. We can see below that there is one 'unsafe' cell which relates to companies in Leitrim that received Aid. Since the total figure for Leitrim is also given (row 16 in the output shown) secondary suppression is required for Leitrim companies that did not receive Aid. And since the total figure for all companies in Connaught that did and did not receive Aid is given (rows 2 and 3), secondary suppression of one other county in addition to Leitrim is also required. In this case the algorithm has chosen Sligo (rows 14 and 15).
 
 ```{r getInfo_final , message=FALSE, warning=FALSE}
 sdc_output <- getInfo(sales_sdc_secondary , type = "finalData")
@@ -194,7 +194,7 @@ print(getInfo(sales_sdc_secondary , type = "finalData"))
 
 ## Statistics that are also hierarchical
 
-Let's examine a situation where we have statistics which we want to publish, but are inter-related. In the file `company_data_1` we have 'Sales' 'Input Costs' and 'Value Added', where 'Value Added' is equal to 'Sales' minus 'Input Costs'. 
+Let's examine a situation where we have statistics which we want to publish, but are inter-related. In the file `company_data_1` we have 'Sales', 'Input Costs' and 'Value Added', where 'Value Added' is equal to 'Sales' minus 'Input Costs'. 
 
 ```{r import_3 , message=FALSE, warning=FALSE}
 company_data_1 <- read_csv("input/company_data_1.csv")
@@ -202,11 +202,13 @@ company_data_1 <- read_csv("input/company_data_1.csv")
 head(company_data_1)
 ```
 
-Because of this relationship, an unsafe cell in one statistic will require that secondary suppression be applied to at least one of the other two statistics, or else the unsafe cell would be easily calculated. We need to consider 'Statistic' as a dimension and create a hierarchy for it. But first we need to pivot the data into a longer format:
+Because of this relationship, an unsafe cell in one statistic will require that secondary suppression be applied to at least one of the other two statistics, otherwise the unsafe cell would be easily calculated. We need to consider 'Statistic' as a dimension and create a hierarchy for it. But first we need to pivot the data into a longer format:
 
 ```{r pivot_1 , message=FALSE, warning=FALSE}
 company_data_1 <- company_data_1 %>% 
   pivot_longer(cols = 4:6 , names_to = "Statistic")
+
+head(company_data_1)
 ```
 
 Now we can make our hierarchy for Statistic. Note that 'Sales' is the root since it is the sum of the other two.
@@ -222,8 +224,7 @@ hier_display(dimStatistic)
 Ok, let's use this and carry out the primary and secondary suppressions. For the County dimension we will use the same hierarchy as in the first example, `dimCounty`. 
 
 ```{r sec_3 , message=FALSE, warning=FALSE}
-company_data_suppressed <- makeProblem(data = company_data_1 %>% 
-                                         filter(Statistic != "Sales"),
+company_data_suppressed <- makeProblem(data = company_data_1 ,
                                    dimList = list(County = dimCounty, 
                                                   Statistic = dimStatistic),
                                    numVarInd = "value") %>% 
@@ -234,9 +235,11 @@ print(getInfo(company_data_suppressed , type = "finalData"))
 
 ```
 
+Recall that the root of the hierarchy `dimCounty`, which is 'Connaught', does not appear in the microdata, and that these total values are calculated in the course of the data suppression process. However here we can see that the root of the hierarchy `dimStatistic`, 'Sales', does appear in the microdata, we have not filtered it out. The sdcTable package is able to handle both circumstances. If we had filtered out the Statistic 'Sales' from the dataframe `company_data_1` then the results would have been the same.
+
 ## Dimensions without a sum
 
-Sometimes we want to provide a breakdown for a dimension but we don't want to publish a total figure. This could be the case with time series data, where we need tabular data for each day or month or year, but we don't plan on publishing some total like 'All years'. In principle, we could create a hierarchy for a variable like 'Year' with nodes representing each individual year and a root called 'All years', and then we could just discard the data for 'All years' and keep the data for the individual years. The problem with this approach is that it would lead to unnecessary secondary suppressions, because the algorithm would assume that there are more routes for calculating unsafe cells than there actually are. Instead, the data for each year needs to be suppressed separately. This could be done in a loop. As the following example shows. 
+Sometimes we want to provide a breakdown for a dimension but we don't want to publish a total figure. This could be the case with time series data, where we need tabular data for each day or month or year, but we don't plan on publishing some total like 'All years'. In principle, we could create a hierarchy for a variable like 'Year' with nodes representing each individual year and a root called 'All years', and then we could just discard the data for 'All years' and keep the data for the individual years. The problem with this approach is that it would lead to unnecessary secondary suppressions, because the algorithm would assume that there are more routes for calculating unsafe cells than there actually are. Instead, the data for each year needs to be suppressed separately. This could be done in a loop, as the following example shows. 
 
 Let's look at `company_sales_3` which includes sales data for 60 companies across five years from 2010 to 2014. 
 
