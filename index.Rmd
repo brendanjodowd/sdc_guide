@@ -36,6 +36,8 @@ library(tidyverse)
 library(sdcTable)
 ```
 
+The guide uses a couple of datasets of fictional companies which can be downloaded from [here](https://github.com/brendanjodowd/sdc_guide/tree/main/input) in csv format.
+
 We will start with a dataset called `company_sales_1` which can be imported into R as a csv. This dataset contains sales information for 60 fictional companies located in Connaught. There are five columns, the ID and Name of each company, then the County in which it is located, a Y/N indicator to indicate if the company received some kind of Aid, and the value of Sales for the year.
 
 ```{r import_1 , message=FALSE, warning=FALSE}
